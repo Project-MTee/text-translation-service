@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Tilde.MT.TranslationAPIServiceService</name>
+    </assembly>
+    <members>
+        <member name="T:Tilde.MT.TranslationAPIService.Controllers.LanguageDirectionController">
+            <summary>
+            API for language directions
+            </summary>
+        </member>
+        <member name="M:Tilde.MT.TranslationAPIService.Controllers.LanguageDirectionController.Get">
+            <summary>
+            Get available language directions
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Tilde.MT.TranslationAPIService.TranslationAPI.Controllers.TextController">
+            <summary>
+            API for text translation
+            </summary>
+        </member>
+        <member name="M:Tilde.MT.TranslationAPIService.TranslationAPI.Controllers.TextController.GetTranslation(Tilde.MT.TranslationAPIService.Models.TranslationRequest)">
+            <summary>
+            Translate text
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.Domain">
+            <summary>
+            The text domain of the translation system used to produce the translation. This property contain automatically detected domain if not specified within the request.
+            </summary>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.Translations">
+            <summary>
+            Translation results
+            </summary>
+        </member>
+        <member name="T:Tilde.MT.TranslationAPIService.Models.TranslationItem">
+            <summary>
+            Translated information for one translation
+            </summary>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.TranslationItem.Translation">
+            <summary>
+            Translated text
+            </summary>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.TranslationRequest.SrcLang">
+            <summary>
+            The language of the source text. Two-byte languge code accordding to ISO 639-1.
+            </summary>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.TranslationRequest.TrgLang">
+            <summary>
+            The language to translate text to. Two-byte languge code according to ISO 639-1.
+            </summary>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.TranslationRequest.Domain">
+            <summary>
+            (Optional) Text domain of the translation system to use for producing the translation. The domain is going to be detected automatically if not specified.
+            </summary>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.TranslationRequest.Text">
+            <summary>
+            Array of text segments to translate
+            </summary>
+        </member>
+    </members>
+</doc>
