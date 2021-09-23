@@ -4,13 +4,15 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Tilde.MT.TranslationAPIService.Models
+namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation
 {
-    public class LanguageDirection
+    public class TranslationRequest
     {
-        [JsonPropertyName("srcLang")]
+        [JsonPropertyName("text")]
+        public List<string> Text { get; set; }
+        [JsonPropertyName("src")]
         public string SourceLanguage { get; set; }
-        [JsonPropertyName("trgLang")]
+        [JsonPropertyName("tgt")]
         public string TargetLanguage { get; set; }
         [JsonPropertyName("domain")]
         public string Domain { get; set; }

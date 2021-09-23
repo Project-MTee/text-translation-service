@@ -1,20 +1,46 @@
-#Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Translation API Service
 
-#Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+Public text translation service which communicates through **RabbitMQ** to send messages to **Domain detection** service and **MT systems**.
 
-#Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+```
 
-#Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+ -------------------------------
+|                               |
+|    Translation API Service    |
+|                               |
+ -------------------------------
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://www.visualstudio.com/en-us/docs/git/create-a-readme). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+                Requests info about detected domains
+          ↑  ↓        -------------------------------
+                →    |                               |
+                ←    |        Domain detector        |
+                     |                               |
+                      -------------------------------
+
+
+                Requests translation from MT systems
+          ↑  ↓        -------------------------------
+                →    |                               |
+                ←    |          MT system            |
+                     |                               |
+                      -------------------------------
+
+```
+# Test
+
+Deploy RabbitMQ
+
+Install RabbitMQ
+
+```Shell
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+helm install test --set auth.username=root,auth.password=root,auth.erlangCookie=secretcookie bitnami/rabbitmq
+helm delete test
+```
+
+forward ports:
+
+```Shell
+kubectl port-forward --namespace default svc/test-rabbitmq 15672:15672 5672:5672
+```

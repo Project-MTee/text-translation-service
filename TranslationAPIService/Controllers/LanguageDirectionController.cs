@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Tilde.MT.TranslationAPIService.Models;
+using Tilde.MT.TranslationAPIService.Models.Configuration;
 
 namespace Tilde.MT.TranslationAPIService.Controllers
 {
@@ -16,10 +16,18 @@ namespace Tilde.MT.TranslationAPIService.Controllers
     public class LanguageDirectionController : ControllerBase
     {
         private readonly ILogger<LanguageDirectionController> _logger;
+        private readonly ConfigurationSettings _configurationSettings;
+        private readonly IMapper _mapper;
 
-        public LanguageDirectionController(ILogger<LanguageDirectionController> logger)
+        public LanguageDirectionController(
+            ILogger<LanguageDirectionController> logger,
+            IOptions<ConfigurationSettings> configurationSettings,
+            IMapper mapper
+        )
         {
             _logger = logger;
+            _configurationSettings = configurationSettings.Value;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -27,9 +35,10 @@ namespace Tilde.MT.TranslationAPIService.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public ActionResult<LanguageDirection> Get()
+        public ActionResult<IEnumerable<Models.LanguageDirection>> Get()
         {
-            return Ok();
+            var languageDirections = _configurationSettings.LanguageDirections.Select(item => _mapper.Map<Models.LanguageDirection>(item));
+            return Ok(languageDirections);
         }
     }
 }

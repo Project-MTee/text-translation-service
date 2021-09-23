@@ -4,15 +4,22 @@
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>80b12fd0-cc91-4d1b-ab36-240cb3b91ad1</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <AssemblyName>Tilde.MT.TranslationAPIServiceService</AssemblyName>
-    <RootNamespace>Tilde.MT.TranslationAPIServiceService</RootNamespace>
+    <AssemblyName>Tilde.MT.TranslationAPIService</AssemblyName>
+    <RootNamespace>Tilde.MT.TranslationAPIService</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>C:\Users\guntars.puzulis\Documents\GIT\translation-api\TranslationAPIService\Tilde.MT.TranslationAPIService.xml</DocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="MassTransit" Version="7.2.2" />
+    <PackageReference Include="MassTransit.AspNetCore" Version="7.2.2" />
+    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.2.2" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="7.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.1" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.1" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
