@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Tilde.MT.TranslationAPIService.Models
+namespace Tilde.MT.TranslationAPIService.Models.Translation
 {
-    public class TranslationRequest
+    public class RequestTranslation
     {
         /// <summary>
         /// The language of the source text. Two-byte languge code accordding to ISO 639-1.
@@ -32,7 +32,7 @@ namespace Tilde.MT.TranslationAPIService.Models
         /// <summary>
         /// Array of text segments to translate
         /// </summary>
-        [JsonPropertyName("text")] 
+        [JsonPropertyName("text")]
         public List<string> Text { get; set; }
     }
 }

@@ -13,12 +13,12 @@ namespace Tilde.MT.TranslationAPIService.Models.Mappings
         {
             #region RabbitMQ mappings
 
-            CreateMap<Models.TranslationRequest, RabbitMQ.Translation.TranslationRequest>();
-            CreateMap<RabbitMQ.Translation.TranslationResponse, Models.Translation>();
+            CreateMap<Models.Translation.RequestTranslation, Models.RabbitMQ.Translation.TranslationRequest>();
+            CreateMap<Models.RabbitMQ.Translation.TranslationResponse, Models.Translation.Translation>();
 
             #endregion
 
-            CreateMap<Models.Configuration.LanguageDirection, Models.LanguageDirection>();
+            CreateMap<Models.Configuration.LanguageDirection, Models.LanguageDetection.LanguageDirection>();
         }
     }
 }

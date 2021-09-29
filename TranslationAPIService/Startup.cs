@@ -10,6 +10,8 @@ using MassTransit;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
 using AutoMapper;
 using Tilde.MT.TranslationAPIService.Models.Mappings;
+using Tilde.MT.TranslationAPIService.Services;
+using System.Reflection;
 using RabbitMQ.Client;
 
 namespace Tilde.MT.TranslationAPIService
@@ -27,16 +29,17 @@ namespace Tilde.MT.TranslationAPIService
         public void ConfigureServices(IServiceCollection services)
         {
             var serviceConfiguration = Configuration.GetSection("Services").Get<ConfigurationServices>();
+            services.Configure<ConfigurationServices>(Configuration.GetSection("Services"));
             services.Configure<ConfigurationSettings>(Configuration.GetSection("Configuration"));
 
             services.AddMassTransit(x =>
             {
+                x.SetKebabCaseEndpointNameFormatter();
+
+                x.AddConsumers(Assembly.GetEntryAssembly());
+                
                 x.AddRequestClient<Models.RabbitMQ.Translation.TranslationRequest>();
                 x.AddRequestClient<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>();
-                /*x.AddRequestClient<TranslateRequest>();
-
-                x.SetKebabCaseEndpointNameFormatter();
-                */
 
                 x.UsingRabbitMq((context, config) =>
                 {
@@ -46,18 +49,37 @@ namespace Tilde.MT.TranslationAPIService
                         host.Password(serviceConfiguration.RabbitMQ.Password);
                     });
 
-                    config.Publish<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>(x =>
+                    // --- Translation request
+                    config.Send<Models.RabbitMQ.Translation.TranslationRequest>(x =>
                     {
-                        x.ExchangeType = ExchangeType.Direct;
-                        x.BindQueue("foo.bar", "foo.bar", qc =>
+                        x.UseRoutingKeyFormatter(context =>
                         {
-                            qc.ExchangeType = ExchangeType.Direct;
+                            return $"translation.{context.Message.SourceLanguage}.{context.Message.TargetLanguage}.{context.Message.Domain}.plain";
                         });
+
+                        x.UseCorrelationId(context => Guid.NewGuid());
                     });
+
+                    // ---
+
+                    /*config.Send<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>(x =>
+                    {
+                        x.UseRoutingKeyFormatter(context =>
+                        {
+                            return $"domain-detection.{context.Message.SourceLanguage}";
+                        });
+
+                        x.UseCorrelationId(context => Guid.NewGuid());
+                    });*/
+
+                    config.ConfigureEndpoints(context);
+
+                    config.ClearMessageDeserializers();
+                    config.UseRawJsonSerializer();
                 });
             });
 
-            services.AddMassTransitHostedService();
+            services.AddMassTransitHostedService(true);
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -71,6 +93,8 @@ namespace Tilde.MT.TranslationAPIService
                 config.AddProfile(new MappingProfile());
             });
             services.AddSingleton(mappingConfig.CreateMapper());
+
+            services.AddScoped<TranslationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

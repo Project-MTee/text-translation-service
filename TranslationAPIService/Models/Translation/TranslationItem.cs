@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Tilde.MT.TranslationAPIService.Models
+namespace Tilde.MT.TranslationAPIService.Models.Translation
 {
     /// <summary>
     /// Translated information for one translation

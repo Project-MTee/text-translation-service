@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Linq;
+using Tilde.MT.TranslationAPIService.Models;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
+using Tilde.MT.TranslationAPIService.Models.LanguageDetection;
 
 namespace Tilde.MT.TranslationAPIService.Controllers
 {
@@ -35,10 +37,14 @@ namespace Tilde.MT.TranslationAPIService.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public ActionResult<IEnumerable<Models.LanguageDirection>> Get()
+        public ActionResult<GetLanguageDirections> Get()
         {
-            var languageDirections = _configurationSettings.LanguageDirections.Select(item => _mapper.Map<Models.LanguageDirection>(item));
-            return Ok(languageDirections);
+            var response = new GetLanguageDirections()
+            {
+                LanguageDirections = _configurationSettings.LanguageDirections.Select(item => _mapper.Map<Models.LanguageDetection.LanguageDirection>(item))
+            };
+            
+            return Ok(response);
         }
     }
 }

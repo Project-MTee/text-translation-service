@@ -20,7 +20,7 @@
             API for text translation
             </summary>
         </member>
-        <member name="M:Tilde.MT.TranslationAPIService.TranslationAPI.Controllers.TextController.GetTranslation(Tilde.MT.TranslationAPIService.Models.TranslationRequest)">
+        <member name="M:Tilde.MT.TranslationAPIService.TranslationAPI.Controllers.TextController.GetTranslation(Tilde.MT.TranslationAPIService.Models.Translation.RequestTranslation)">
             <summary>
             Translate text
             </summary>
@@ -37,59 +37,59 @@
             2-letter source language code 
             </summary>
         </member>
-        <member name="P:Tilde.MT.TranslationAPIService.Models.RabbitMQ.DomainDetection.DomainDetectionResponse.StatusCode">
-            <summary>
-            HTTP status code (integer), 200 by default
-            </summary>
-        </member>
-        <member name="P:Tilde.MT.TranslationAPIService.Models.RabbitMQ.DomainDetection.DomainDetectionResponse.Status">
-            <summary>
-            human-readable error message or "OK"
-            </summary>
-        </member>
         <member name="P:Tilde.MT.TranslationAPIService.Models.RabbitMQ.DomainDetection.DomainDetectionResponse.Domain">
             <summary>
             string of the detected domain name
             </summary>
         </member>
-        <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.Domain">
+        <member name="P:Tilde.MT.TranslationAPIService.Models.RabbitMQ.RabbitMQGenericMessage.StatusCode">
             <summary>
-            The text domain of the translation system used to produce the translation. This property contain automatically detected domain if not specified within the request.
+            HTTP status code (integer), 200 by default
             </summary>
         </member>
-        <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.Translations">
+        <member name="P:Tilde.MT.TranslationAPIService.Models.RabbitMQ.RabbitMQGenericMessage.Status">
             <summary>
-            Translation results
+            human-readable error message or "OK"
             </summary>
         </member>
-        <member name="T:Tilde.MT.TranslationAPIService.Models.TranslationItem">
-            <summary>
-            Translated information for one translation
-            </summary>
-        </member>
-        <member name="P:Tilde.MT.TranslationAPIService.Models.TranslationItem.Translation">
-            <summary>
-            Translated text
-            </summary>
-        </member>
-        <member name="P:Tilde.MT.TranslationAPIService.Models.TranslationRequest.SourceLanguage">
+        <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.RequestTranslation.SourceLanguage">
             <summary>
             The language of the source text. Two-byte languge code accordding to ISO 639-1.
             </summary>
         </member>
-        <member name="P:Tilde.MT.TranslationAPIService.Models.TranslationRequest.TargetLanguage">
+        <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.RequestTranslation.TargetLanguage">
             <summary>
             The language to translate text to. Two-byte languge code according to ISO 639-1.
             </summary>
         </member>
-        <member name="P:Tilde.MT.TranslationAPIService.Models.TranslationRequest.Domain">
+        <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.RequestTranslation.Domain">
             <summary>
             (Optional) Text domain of the translation system to use for producing the translation. The domain is going to be detected automatically if not specified.
             </summary>
         </member>
-        <member name="P:Tilde.MT.TranslationAPIService.Models.TranslationRequest.Text">
+        <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.RequestTranslation.Text">
             <summary>
             Array of text segments to translate
+            </summary>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.Translation.Domain">
+            <summary>
+            The text domain of the translation system used to produce the translation. This property contain automatically detected domain if not specified within the request.
+            </summary>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.Translation.Translations">
+            <summary>
+            Translation results
+            </summary>
+        </member>
+        <member name="T:Tilde.MT.TranslationAPIService.Models.Translation.TranslationItem">
+            <summary>
+            Translated information for one translation
+            </summary>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.TranslationItem.Translation">
+            <summary>
+            Translated text
             </summary>
         </member>
     </members>
