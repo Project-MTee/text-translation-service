@@ -47,11 +47,9 @@ class DummyWorker():
             channel = await connection.channel()
             await channel.set_qos(prefetch_count=1)
 
-            exchange = await channel.declare_exchange(self.__exchange, ExchangeType.DIRECT, durable=True)
+            exchange = await channel.declare_exchange(self.__exchange, ExchangeType.DIRECT, durable=False)
 
-            response_exchange = await channel.get_exchange("translation.response")
-
-            queue = await channel.declare_queue(self.__queue, auto_delete=False, durable=True)
+            queue = await channel.declare_queue(self.__queue, auto_delete=False, durable=False)
             await queue.bind(exchange, routing_key=self.__routing_key)
 
             self.__logger.info("RabbitMQ ready for messages")
@@ -63,17 +61,22 @@ class DummyWorker():
                         self.__logger.info(f"Work item received: {json.dumps(message_body, sort_keys=True, indent=4)}")
                         self.__logger.info(f"{message.correlation_id}")
 
+                        translations = message_body["text"]
+                        for i in range(len(translations)):
+                            translations[i] = "_translated :)_" + translations[i]
+
                         response = json.dumps({
-                            "bar":"baz"
+                            "status":"Im ok",
+                            "status_code":200,
+                            "translation": translations
                         }).encode()
 
-                        await response_exchange.publish(
+                        await channel.default_exchange.publish(
                             Message(
                                 body=response,
-                                content_type="application/json",
                                 correlation_id=message.correlation_id
                             ),
-                            routing_key=""
+                            routing_key=message.reply_to
                         )
 
         self.__logger.info("RabbitMQ stoped")

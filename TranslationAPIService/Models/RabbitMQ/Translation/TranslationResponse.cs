@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 
 namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation
 {
-    public class TranslationResponse//: RabbitMQGenericMessage
+    public class TranslationResponse: RabbitMQGenericMessage
     {
-        [JsonPropertyName("bar")]
-        public string bar { get; set; }
+        /// <summary>
+        /// Translation result
+        /// </summary>
+        [JsonPropertyName("translation")]
+        public List<string> Translations { get; set; }
     }
 }

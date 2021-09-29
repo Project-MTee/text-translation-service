@@ -4,6 +4,9 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Extensions.RabbitMQ;
 using Tilde.MT.TranslationAPIService.Models;
@@ -14,36 +17,26 @@ namespace Tilde.MT.TranslationAPIService.Services
 {
     public class TranslationService
     {
-        private readonly IBus _bus;
+        //private readonly IBus _bus;
         private readonly ILogger _logger;
         private readonly ConfigurationServices _serviceConfiguration;
         private readonly IMapper _mapper;
-
-        private readonly IRequestClient<Models.RabbitMQ.Translation.TranslationRequest> _translationClient;
-        private readonly IRequestClient<Models.RabbitMQ.DomainDetection.DomainDetectionRequest> _domainDetectionClient;
-
-        private readonly ISendEndpointProvider _sendEndpointProvider;
-
+        private readonly RequestClient<Models.RabbitMQ.Translation.TranslationRequest, Models.RabbitMQ.Translation.TranslationResponse> _translationClient;
+        private readonly RequestClient<Models.RabbitMQ.DomainDetection.DomainDetectionRequest, Models.RabbitMQ.DomainDetection.DomainDetectionResponse> _domainDetectionClient;
         public TranslationService(
             ILogger<TranslationService> logger,
-            IBus bus,
             IOptions<ConfigurationServices> configurationSettings,
             IMapper mapper,
-            ISendEndpointProvider sendEndpointProvider
+            RequestClient<Models.RabbitMQ.Translation.TranslationRequest, Models.RabbitMQ.Translation.TranslationResponse> translationClient,
+            RequestClient<Models.RabbitMQ.DomainDetection.DomainDetectionRequest, Models.RabbitMQ.DomainDetection.DomainDetectionResponse> domainDetectionClient
         )
         {
-            _bus = bus;
-            
             _logger = logger;
             _serviceConfiguration = configurationSettings.Value;
             _mapper = mapper;
 
-            var translationServiceAddress = new Uri($"exchange:{_serviceConfiguration.RabbitMQ.TranslationExchangeName}?type=direct");
-            _translationClient = _bus.CreateRequestClient<Models.RabbitMQ.Translation.TranslationRequest>(translationServiceAddress);
-            var domainDetectionServiceAdress = new Uri($"exchange:{_serviceConfiguration.RabbitMQ.LanguageDetectionExchangeName}?type=direct");
-            _domainDetectionClient = _bus.CreateRequestClient<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>(domainDetectionServiceAdress);
-
-            _sendEndpointProvider = sendEndpointProvider;
+            _translationClient = translationClient;
+            _domainDetectionClient = domainDetectionClient;
         }
         public async Task<ServiceResponse<Translation>> Translate(RequestTranslation translationRequest)
         {
@@ -52,7 +45,7 @@ namespace Tilde.MT.TranslationAPIService.Services
             {
                 var rabbitMQMessage = _mapper.Map<Models.RabbitMQ.Translation.TranslationRequest>(translationRequest);
 
-                /*if (string.IsNullOrEmpty(rabbitMQMessage.Domain))
+                if (string.IsNullOrEmpty(rabbitMQMessage.Domain))
                 {
                     _logger.LogDebug("Domain not provided, fetch from Domain detection");
 
@@ -62,39 +55,34 @@ namespace Tilde.MT.TranslationAPIService.Services
                         Text = rabbitMQMessage.Text
                     };
 
-                    var domainResponse = await _domainDetectionClient.GetResponse<Models.RabbitMQ.DomainDetection.DomainDetectionResponse>(domainDetectionMessage);
-                    rabbitMQMessage.Domain = domainResponse.Message.Domain;
+                    var domainRoutingKey = GetDomainDetectionRoutingKey(domainDetectionMessage);
+                    var domainResponse = await _domainDetectionClient.GetResponse(domainDetectionMessage, domainRoutingKey, "domain-detection", TimeSpan.FromSeconds(10));
+                    rabbitMQMessage.Domain = domainResponse.Domain;
 
                     _logger.LogDebug($"Detected domain: {rabbitMQMessage.Domain}");
                 }
 
                 _logger.LogDebug("Request translation from MT system");
 
-                using var request = _translationClient.Create(translationRequest);
-                request.UseExecute(x => x.AddReplyToProperty());
-                var translationResponse = await request.GetResponse<Models.RabbitMQ.Translation.TranslationResponse>();
-
-                response.Data = _mapper.Map<Translation>(translationResponse.Message);*/
-
-                var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"exchange:{_serviceConfiguration.RabbitMQ.TranslationExchangeName}?type=direct"));
-
-
-                await endpoint.Send<Models.RabbitMQ.Translation.TranslationRequest>(
-                    rabbitMQMessage,
-                    context => {
-                        context.CorrelationId = new Guid("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");// Guid.NewGuid();
-                    }
-                );
-
+                var translationRoutingKey = GetTranslationRoutingKey(rabbitMQMessage);
+                var translationResponse = await _translationClient.GetResponse(rabbitMQMessage, translationRoutingKey, "translation", TimeSpan.FromSeconds(10));
 
                 _logger.LogDebug("Translation received");
+
+                response.Data = new Translation()
+                {
+                    Domain = rabbitMQMessage.Domain,
+                    Translations = translationResponse.Translations.Select(item => new TranslationItem() { 
+                        Translation = item 
+                    }).ToList()
+                };
             }
-            catch (RequestTimeoutException ex)
+            catch (TimeoutException ex)
             {
                 _logger.LogError(ex, "Translation timed out");
                 response.Error = new Error()
                 {
-                    Code = 400,
+                    Code = (int)HttpStatusCode.GatewayTimeout,
                     Message = "Translation timed out"
                 };
             }
@@ -103,12 +91,22 @@ namespace Tilde.MT.TranslationAPIService.Services
                 _logger.LogError(ex, "Failed to translate text");
                 response.Error = new Error()
                 {
-                    Code = 500,
+                    Code = (int)HttpStatusCode.InternalServerError,
                     Message = "Unknown error"
                 };
             }
 
             return response;
+        }
+
+        private string GetTranslationRoutingKey(Models.RabbitMQ.Translation.TranslationRequest item)
+        {
+            return $"translation.{item.SourceLanguage}.{item.TargetLanguage}.{item.Domain}.plain";
+        }
+
+        private string GetDomainDetectionRoutingKey(Models.RabbitMQ.DomainDetection.DomainDetectionRequest item)
+        {
+            return $"domain-detection.{item.SourceLanguage}";
         }
     }
 }

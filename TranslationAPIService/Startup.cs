@@ -13,6 +13,7 @@ using Tilde.MT.TranslationAPIService.Models.Mappings;
 using Tilde.MT.TranslationAPIService.Services;
 using System.Reflection;
 using RabbitMQ.Client;
+using Tilde.MT.TranslationAPIService.Extensions.RabbitMQ;
 
 namespace Tilde.MT.TranslationAPIService
 {
@@ -32,55 +33,6 @@ namespace Tilde.MT.TranslationAPIService
             services.Configure<ConfigurationServices>(Configuration.GetSection("Services"));
             services.Configure<ConfigurationSettings>(Configuration.GetSection("Configuration"));
 
-            services.AddMassTransit(x =>
-            {
-                x.SetKebabCaseEndpointNameFormatter();
-
-                x.AddConsumers(Assembly.GetEntryAssembly());
-                
-                x.AddRequestClient<Models.RabbitMQ.Translation.TranslationRequest>();
-                x.AddRequestClient<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>();
-
-                x.UsingRabbitMq((context, config) =>
-                {
-                    config.Host(serviceConfiguration.RabbitMQ.Host, "/", host =>
-                    {
-                        host.Username(serviceConfiguration.RabbitMQ.UserName);
-                        host.Password(serviceConfiguration.RabbitMQ.Password);
-                    });
-
-                    // --- Translation request
-                    config.Send<Models.RabbitMQ.Translation.TranslationRequest>(x =>
-                    {
-                        x.UseRoutingKeyFormatter(context =>
-                        {
-                            return $"translation.{context.Message.SourceLanguage}.{context.Message.TargetLanguage}.{context.Message.Domain}.plain";
-                        });
-
-                        x.UseCorrelationId(context => Guid.NewGuid());
-                    });
-
-                    // ---
-
-                    /*config.Send<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>(x =>
-                    {
-                        x.UseRoutingKeyFormatter(context =>
-                        {
-                            return $"domain-detection.{context.Message.SourceLanguage}";
-                        });
-
-                        x.UseCorrelationId(context => Guid.NewGuid());
-                    });*/
-
-                    config.ConfigureEndpoints(context);
-
-                    config.ClearMessageDeserializers();
-                    config.UseRawJsonSerializer();
-                });
-            });
-
-            services.AddMassTransitHostedService(true);
-
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -95,6 +47,9 @@ namespace Tilde.MT.TranslationAPIService
             services.AddSingleton(mappingConfig.CreateMapper());
 
             services.AddScoped<TranslationService>();
+
+            services.AddSingleton<RequestClient<Models.RabbitMQ.Translation.TranslationRequest, Models.RabbitMQ.Translation.TranslationResponse>>();
+            services.AddSingleton<RequestClient<Models.RabbitMQ.DomainDetection.DomainDetectionRequest, Models.RabbitMQ.DomainDetection.DomainDetectionResponse>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

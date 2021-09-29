@@ -52,6 +52,11 @@
             human-readable error message or "OK"
             </summary>
         </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationResponse.Translations">
+            <summary>
+            Translation result
+            </summary>
+        </member>
         <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.RequestTranslation.SourceLanguage">
             <summary>
             The language of the source text. Two-byte languge code accordding to ISO 639-1.
