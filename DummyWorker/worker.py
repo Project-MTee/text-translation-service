@@ -74,7 +74,11 @@ class DummyWorker():
                         await channel.default_exchange.publish(
                             Message(
                                 body=response,
-                                correlation_id=message.correlation_id
+                                content_type="application/json",
+                                correlation_id=message.correlation_id,
+                                headers={
+                                    'RequestId': message.headers["RequestId"]
+                                }
                             ),
                             routing_key=message.reply_to
                         )

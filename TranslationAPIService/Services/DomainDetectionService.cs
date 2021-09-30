@@ -6,17 +6,17 @@ using System;
 using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Extensions.MassTransit;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
-using Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation;
+using Tilde.MT.TranslationAPIService.Models.RabbitMQ.DomainDetection;
 
 namespace Tilde.MT.TranslationAPIService.Services
 {
-    public class TranslationService
+    public class DomainDetectionService
     {
         private readonly ConfigurationSettings _configurationSettings;
-        private readonly IRequestClient<TranslationRequest> _client;
+        private readonly IRequestClient<DomainDetectionRequest> _client;
         private readonly ILogger _logger;
 
-        public TranslationService(
+        public DomainDetectionService(
             IOptions<ConfigurationSettings> configurationSettings,
             ILogger<DomainDetectionService> logger,
             IBus bus
@@ -25,15 +25,15 @@ namespace Tilde.MT.TranslationAPIService.Services
             _configurationSettings = configurationSettings.Value;
             _logger = logger;
 
-            var addr = new Uri($"exchange:translation?type=direct&durable=false");
-            _client = bus.CreateRequestClient<TranslationRequest>(addr);
+            var addr = new Uri($"exchange:domain-detection?type=direct&durable=false");
+            _client = bus.CreateRequestClient<DomainDetectionRequest>(addr);
         }
 
-        public async Task<TranslationResponse> Translate(TranslationRequest translationRequest)
+        public async Task<DomainDetectionResponse> Detect(DomainDetectionRequest detectionRequest)
         {
-            using var request = _client.Create(translationRequest, timeout: _configurationSettings.TranslationTimeout);
+            using var request = _client.Create(detectionRequest, timeout: _configurationSettings.DomainDetectionTimeout);
             request.UseExecute(x => x.AddRequestHeaders());
-            var translationResponse = await request.GetResponse<TranslationResponse>();
+            var translationResponse = await request.GetResponse<DomainDetectionResponse>();
 
             return translationResponse.Message;
         }

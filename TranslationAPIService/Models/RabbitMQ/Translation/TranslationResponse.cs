@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -11,7 +12,7 @@ namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation
         /// <summary>
         /// Translation result
         /// </summary>
-        [JsonPropertyName("translation")]
-        public List<string> Translations { get; set; }
+        [JsonProperty("translation")]
+        public string[] Translations { get; set; }
     }
 }

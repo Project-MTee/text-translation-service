@@ -11,9 +11,6 @@ using Tilde.MT.TranslationAPIService.Models.Configuration;
 using AutoMapper;
 using Tilde.MT.TranslationAPIService.Models.Mappings;
 using Tilde.MT.TranslationAPIService.Services;
-using System.Reflection;
-using RabbitMQ.Client;
-using Tilde.MT.TranslationAPIService.Extensions.RabbitMQ;
 
 namespace Tilde.MT.TranslationAPIService
 {
@@ -30,6 +27,7 @@ namespace Tilde.MT.TranslationAPIService
         public void ConfigureServices(IServiceCollection services)
         {
             var serviceConfiguration = Configuration.GetSection("Services").Get<ConfigurationServices>();
+            var configurationSettings = Configuration.GetSection("Configuration").Get<ConfigurationSettings>();
             services.Configure<ConfigurationServices>(Configuration.GetSection("Services"));
             services.Configure<ConfigurationSettings>(Configuration.GetSection("Configuration"));
 
@@ -37,6 +35,7 @@ namespace Tilde.MT.TranslationAPIService
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TranslationAPI", Version = "v1" });
+                c.EnableAnnotations();
                 c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{nameof(Tilde)}.{nameof(Tilde.MT)}.{nameof(Tilde.MT.TranslationAPIService)}.xml"));
             });
 
@@ -46,10 +45,51 @@ namespace Tilde.MT.TranslationAPIService
             });
             services.AddSingleton(mappingConfig.CreateMapper());
 
-            services.AddScoped<TranslationService>();
+            services.AddMassTransit(x =>
+            {
+                x.SetKebabCaseEndpointNameFormatter();
 
-            services.AddSingleton<RequestClient<Models.RabbitMQ.Translation.TranslationRequest, Models.RabbitMQ.Translation.TranslationResponse>>();
-            services.AddSingleton<RequestClient<Models.RabbitMQ.DomainDetection.DomainDetectionRequest, Models.RabbitMQ.DomainDetection.DomainDetectionResponse>>();
+                x.AddRequestClient<Models.RabbitMQ.Translation.TranslationRequest>();
+                x.AddRequestClient<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>();
+
+                x.UsingRabbitMq((context, config) =>
+                {
+                    config.Host("localhost", "/", host =>
+                    {
+                        host.Username("root");
+                        host.Password("root");
+                    });
+
+                    config.Send<Models.RabbitMQ.Translation.TranslationRequest>(x =>
+                    {
+                        x.UseRoutingKeyFormatter(context =>
+                        {
+                            return $"translation.{context.Message.SourceLanguage}.{context.Message.TargetLanguage}.{context.Message.Domain}.{context.Message.InputType}";
+                        });
+
+                        x.UseCorrelationId(context => Guid.NewGuid());
+                    });
+
+                    config.Send<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>(x =>
+                    {
+                        x.UseRoutingKeyFormatter(context =>
+                        {
+                            return $"domain-detection.{context.Message.SourceLanguage}";
+                        });
+
+                        x.UseCorrelationId(context => Guid.NewGuid());
+                    });
+
+                    config.ConfigureEndpoints(context);
+
+                    config.UseRawJsonSerializer();
+                });
+            });
+
+            services.AddMassTransitHostedService(true);
+
+            services.AddSingleton<DomainDetectionService>();
+            services.AddSingleton<TranslationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

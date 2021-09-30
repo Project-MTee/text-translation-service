@@ -1,20 +1,19 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation
 {
     public class TranslationRequest
     {
-        [JsonPropertyName("text")]
+        [JsonProperty("text")]
         public List<string> Text { get; set; }
-        [JsonPropertyName("src")]
+        [JsonProperty("src")]
         public string SourceLanguage { get; set; }
-        [JsonPropertyName("tgt")]
+        [JsonProperty("tgt")]
         public string TargetLanguage { get; set; }
-        [JsonPropertyName("domain")]
+        [JsonProperty("domain")]
         public string Domain { get; set; }
+        [JsonProperty("input_type")]
+        public string InputType { get; set; }
     }
 }

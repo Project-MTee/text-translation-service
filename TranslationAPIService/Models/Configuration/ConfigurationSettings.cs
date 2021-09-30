@@ -8,5 +8,7 @@ namespace Tilde.MT.TranslationAPIService.Models.Configuration
     public class ConfigurationSettings
     {
         public List<LanguageDirection> LanguageDirections { get; set; }
+        public TimeSpan TranslationTimeout { get; set; }
+        public TimeSpan DomainDetectionTimeout { get; set; }
     }
 }

@@ -2,11 +2,13 @@
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using Tilde.MT.TranslationAPIService.Enums;
 using Tilde.MT.TranslationAPIService.Models;
-using Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation;
 using Tilde.MT.TranslationAPIService.Models.Translation;
 using Tilde.MT.TranslationAPIService.Services;
 
@@ -22,7 +24,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         private readonly ILogger<TextController> _logger;
         private readonly IMapper _mapper;
         private readonly TranslationService _translationService;
-        
+        private readonly DomainDetectionService _domainDetectionService;
 
         public TextController(
             ILogger<TextController> logger, 
@@ -41,10 +43,120 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost]
+        [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(Translation))]
+        [SwaggerResponse((int)HttpStatusCode.InternalServerError, Description = "An unexpected error occured. See the response for more details.", Type=typeof(APIResponse))]
+        [SwaggerResponse((int)HttpStatusCode.GatewayTimeout, Description = "Request timed out.", Type=typeof(APIResponse))]
         public async Task<ActionResult<Translation>> GetTranslation(Models.Translation.RequestTranslation request)
         {
-            var response = await _translationService.Translate(request);
-            return Ok(response);
+            var translationMessage = _mapper.Map<Models.RabbitMQ.Translation.TranslationRequest>(request);
+            translationMessage.InputType = TranslationType.plain.ToString();
+            if (string.IsNullOrEmpty(request.Domain))
+            {
+                try
+                {
+                    _logger.LogDebug("Request domain detection, domain not provided");
+                    var detectedDomain = await _domainDetectionService.Detect(new Models.RabbitMQ.DomainDetection.DomainDetectionRequest()
+                    {
+                        SourceLanguage = request.SourceLanguage,
+                        Text = request.Text
+                    });
+
+                    translationMessage.Domain = detectedDomain.Domain;
+                }
+                catch (RequestTimeoutException)
+                {
+                    _logger.LogError("Domain detection timed out");
+                    return StatusCode(
+                        (int)HttpStatusCode.GatewayTimeout,
+                        new Translation()
+                        {
+                            Error = new Error()
+                            {
+                                Code = (int)HttpStatusCode.GatewayTimeout * 1000 + 1,
+                                Message = "Domain detection timed out"
+                            }
+                        }
+                    );
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogError(ex, "Domain detection failed");
+
+                    return StatusCode(
+                        (int)HttpStatusCode.InternalServerError,
+                        new Translation()
+                        {
+                            Error = new Error()
+                            {
+                                Code = (int)HttpStatusCode.InternalServerError * 1000 + 1,
+                                Message = ex.Message
+                            }
+                        }
+                    );
+                }
+            }
+
+            try
+            {
+                var response = await _translationService.Translate(translationMessage);
+
+                if (response.StatusCode != (int)HttpStatusCode.OK)
+                {
+                    return StatusCode(
+                        response.StatusCode,
+                        new Translation()
+                        {
+                            Error = new Error()
+                            {
+                                Code = response.StatusCode + 2,
+                                Message = response.Status
+                            }
+                        }
+                    );
+                }
+                else
+                {
+                    var translationResponse = new Translation()
+                    {
+                        Domain = translationMessage.Domain,
+                        Translations = response.Translations.Select(item => new TranslationItem()
+                        {
+                            Translation = item
+                        }).ToList()
+                    };
+                    return Ok(translationResponse);
+                }
+            }
+            catch (RequestTimeoutException)
+            {
+                return StatusCode(
+                    (int)HttpStatusCode.GatewayTimeout,
+                    new Translation()
+                    {
+                        Error = new Error()
+                        {
+                            Code = (int)HttpStatusCode.GatewayTimeout * 1000 + 3,
+                            Message = "Translation timed out"
+                        }
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Translation failed");
+
+                return StatusCode(
+                    (int)HttpStatusCode.InternalServerError,
+                    new Translation()
+                    {
+                        Error = new Error()
+                        {
+                            Code = (int)HttpStatusCode.InternalServerError * 1000 + 3,
+                            Message = ex.Message
+                        }
+                    }
+                );
+            }
         }
     }
 }
