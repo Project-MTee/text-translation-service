@@ -31,8 +31,8 @@ namespace Tilde.MT.TranslationAPIService
                     {
                         log.MinimumLevel.Verbose();
                     }
-                    log.MinimumLevel.Override("Microsoft", LogEventLevel.Information);
-                    log.MinimumLevel.Override("Quartz", LogEventLevel.Information);
+                    log.MinimumLevel.Override("Microsoft", LogEventLevel.Warning);
+
                     log.WriteTo.Console();
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
