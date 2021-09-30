@@ -54,10 +54,10 @@ namespace Tilde.MT.TranslationAPIService
 
                 x.UsingRabbitMq((context, config) =>
                 {
-                    config.Host("localhost", "/", host =>
+                    config.Host(serviceConfiguration.RabbitMQ.Host, "/", host =>
                     {
-                        host.Username("root");
-                        host.Password("root");
+                        host.Username(serviceConfiguration.RabbitMQ.UserName);
+                        host.Password(serviceConfiguration.RabbitMQ.Password);
                     });
 
                     config.Send<Models.RabbitMQ.Translation.TranslationRequest>(x =>
