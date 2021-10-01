@@ -29,12 +29,14 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         public TextController(
             ILogger<TextController> logger, 
             IMapper mapper,
-            TranslationService translationService
+            TranslationService translationService,
+            DomainDetectionService domainDetectionService
         )
         {
             _logger = logger;
             _mapper = mapper;
             _translationService = translationService;
+            _domainDetectionService = domainDetectionService;
         }
 
         /// <summary>

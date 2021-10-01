@@ -82,7 +82,9 @@ namespace Tilde.MT.TranslationAPIService
 
                     config.ConfigureEndpoints(context);
 
-                    config.UseRawJsonSerializer();
+                    config.UseRawJsonSerializer(
+                        MassTransit.Serialization.RawJsonSerializerOptions.AddTransportHeaders
+                    );
                 });
             });
 
@@ -102,7 +104,7 @@ namespace Tilde.MT.TranslationAPIService
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TranslationAPI v1"));
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 

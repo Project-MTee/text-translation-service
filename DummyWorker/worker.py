@@ -5,9 +5,7 @@ import os
 import json
 
 from aio_pika import ExchangeType
-from aio_pika.message import DeliveryMode, Message
-from urllib.parse import urlparse
-
+from aio_pika.message import Message
 class DummyWorker():
     def __init__(self):
         self.__logger = logging.getLogger('DummyWorker')
@@ -77,7 +75,8 @@ class DummyWorker():
                                 content_type="application/json",
                                 correlation_id=message.correlation_id,
                                 headers={
-                                    'RequestId': message.headers["RequestId"]
+                                    'RequestId': message.headers["RequestId"],
+                                    'MT-MessageType': message.headers["ReturnMessageType"],
                                 }
                             ),
                             routing_key=message.reply_to

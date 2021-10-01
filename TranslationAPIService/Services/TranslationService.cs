@@ -32,7 +32,7 @@ namespace Tilde.MT.TranslationAPIService.Services
         public async Task<TranslationResponse> Translate(TranslationRequest translationRequest)
         {
             using var request = _client.Create(translationRequest, timeout: _configurationSettings.TranslationTimeout);
-            request.UseExecute(x => x.AddRequestHeaders());
+            request.UseExecute(x => x.AddRequestHeaders<TranslationResponse>());
             var translationResponse = await request.GetResponse<TranslationResponse>();
 
             return translationResponse.Message;

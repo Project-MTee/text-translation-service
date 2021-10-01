@@ -32,7 +32,7 @@ namespace Tilde.MT.TranslationAPIService.Services
         public async Task<DomainDetectionResponse> Detect(DomainDetectionRequest detectionRequest)
         {
             using var request = _client.Create(detectionRequest, timeout: _configurationSettings.DomainDetectionTimeout);
-            request.UseExecute(x => x.AddRequestHeaders());
+            request.UseExecute(x => x.AddRequestHeaders<DomainDetectionResponse>());
             var translationResponse = await request.GetResponse<DomainDetectionResponse>();
 
             return translationResponse.Message;
