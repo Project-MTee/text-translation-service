@@ -56,8 +56,8 @@ class DummyWorker():
                 async for message in queue_iter:
                     async with message.process():
                         message_body = json.loads(message.body)
-                        self.__logger.info(f"Work item received: {json.dumps(message_body, sort_keys=True, indent=4)}")
-                        self.__logger.info(f"{message.correlation_id}")
+                        # self.__logger.info(f"Work item received: {json.dumps(message_body, sort_keys=True, indent=4)}")
+                        # self.__logger.info(f"{message.correlation_id}")
 
                         translations = message_body["text"]
                         for i in range(len(translations)):

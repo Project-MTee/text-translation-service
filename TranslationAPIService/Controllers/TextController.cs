@@ -74,7 +74,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                         {
                             Error = new Error()
                             {
-                                Code = (int)HttpStatusCode.GatewayTimeout * 1000 + 1,
+                                Code = (int)HttpStatusCode.GatewayTimeout * 1000 + (int)ErrorSubCode.GatewayDomainDetectionTimedOut,
                                 Message = "Domain detection timed out"
                             }
                         }
@@ -90,7 +90,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                         {
                             Error = new Error()
                             {
-                                Code = (int)HttpStatusCode.InternalServerError * 1000 + 1,
+                                Code = (int)HttpStatusCode.InternalServerError * 1000 + (int)ErrorSubCode.GatewayDomainDetectionGeneric,
                                 Message = ex.Message
                             }
                         }
@@ -110,7 +110,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                         {
                             Error = new Error()
                             {
-                                Code = response.StatusCode + 2,
+                                Code = response.StatusCode + (int)ErrorSubCode.WorkerTranslationGeneric,
                                 Message = response.Status
                             }
                         }
@@ -137,7 +137,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                     {
                         Error = new Error()
                         {
-                            Code = (int)HttpStatusCode.GatewayTimeout * 1000 + 3,
+                            Code = (int)HttpStatusCode.GatewayTimeout * 1000 + (int)ErrorSubCode.GatewayTranslationTimedOut,
                             Message = "Translation timed out"
                         }
                     }
@@ -153,7 +153,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                     {
                         Error = new Error()
                         {
-                            Code = (int)HttpStatusCode.InternalServerError * 1000 + 3,
+                            Code = (int)HttpStatusCode.InternalServerError * 1000 + (int)ErrorSubCode.GatewayTranslationGeneric,
                             Message = ex.Message
                         }
                     }
