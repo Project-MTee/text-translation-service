@@ -53,6 +53,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(Translation))]
         [SwaggerResponse((int)HttpStatusCode.InternalServerError, Description = "An unexpected error occured. See the response for more details.", Type=typeof(APIResponse))]
         [SwaggerResponse((int)HttpStatusCode.GatewayTimeout, Description = "Request timed out.", Type=typeof(APIResponse))]
+        [SwaggerResponse((int)HttpStatusCode.NotFound, Description = "Language direction is not found", Type = typeof(APIResponse))]
         public async Task<ActionResult<Translation>> GetTranslation(Models.Translation.RequestTranslation request)
         {
             // check if language direction exists.
@@ -63,16 +64,10 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
             });
             if (languageDirectionInSettings == null)
             {
-                return StatusCode(
-                    (int)HttpStatusCode.NotFound,
-                    new Translation()
-                    {
-                        Error = new Error()
-                        {
-                            Code = (int)HttpStatusCode.NotFound * 1000 + (int)ErrorSubCode.GatewayLanguageDirectionNotFound,
-                            Message = "Language direction is not found"
-                        }
-                    }
+                return FormatTranslationError(
+                    HttpStatusCode.NotFound,
+                    ErrorSubCode.GatewayLanguageDirectionNotFound,
+                    "Language direction is not found"
                 );
             }
 
@@ -94,32 +89,21 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                 catch (RequestTimeoutException)
                 {
                     _logger.LogError("Domain detection timed out");
-                    return StatusCode(
-                        (int)HttpStatusCode.GatewayTimeout,
-                        new Translation()
-                        {
-                            Error = new Error()
-                            {
-                                Code = (int)HttpStatusCode.GatewayTimeout * 1000 + (int)ErrorSubCode.GatewayDomainDetectionTimedOut,
-                                Message = "Domain detection timed out"
-                            }
-                        }
+
+                    return FormatTranslationError(
+                        HttpStatusCode.GatewayTimeout,
+                        ErrorSubCode.GatewayDomainDetectionTimedOut,
+                        "Domain detection timed out"
                     );
                 }
                 catch(Exception ex)
                 {
                     _logger.LogError(ex, "Domain detection failed");
 
-                    return StatusCode(
-                        (int)HttpStatusCode.InternalServerError,
-                        new Translation()
-                        {
-                            Error = new Error()
-                            {
-                                Code = (int)HttpStatusCode.InternalServerError * 1000 + (int)ErrorSubCode.GatewayDomainDetectionGeneric,
-                                Message = ex.Message
-                            }
-                        }
+                    return FormatTranslationError(
+                        HttpStatusCode.InternalServerError,
+                        ErrorSubCode.GatewayDomainDetectionGeneric,
+                        ex.Message
                     );
                 }
             }
@@ -128,18 +112,12 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
             {
                 var response = await _translationService.Translate(translationMessage);
 
-                if (response.StatusCode != (int)HttpStatusCode.OK)
+                if ((HttpStatusCode)response.StatusCode != HttpStatusCode.OK)
                 {
-                    return StatusCode(
-                        response.StatusCode,
-                        new Translation()
-                        {
-                            Error = new Error()
-                            {
-                                Code = response.StatusCode * 1000 + (int)ErrorSubCode.WorkerTranslationGeneric,
-                                Message = response.Status
-                            }
-                        }
+                    return FormatTranslationError(
+                        (HttpStatusCode)response.StatusCode,
+                        ErrorSubCode.WorkerTranslationGeneric,
+                        response.Status
                     );
                 }
                 else
@@ -157,34 +135,37 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
             }
             catch (RequestTimeoutException)
             {
-                return StatusCode(
-                    (int)HttpStatusCode.GatewayTimeout,
-                    new Translation()
-                    {
-                        Error = new Error()
-                        {
-                            Code = (int)HttpStatusCode.GatewayTimeout * 1000 + (int)ErrorSubCode.GatewayTranslationTimedOut,
-                            Message = "Translation timed out"
-                        }
-                    }
+                return FormatTranslationError(
+                    HttpStatusCode.GatewayTimeout,
+                    ErrorSubCode.GatewayTranslationTimedOut,
+                    "Translation timed out"
                 );
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Translation failed");
 
-                return StatusCode(
-                    (int)HttpStatusCode.InternalServerError,
-                    new Translation()
-                    {
-                        Error = new Error()
-                        {
-                            Code = (int)HttpStatusCode.InternalServerError * 1000 + (int)ErrorSubCode.GatewayTranslationGeneric,
-                            Message = ex.Message
-                        }
-                    }
+                return FormatTranslationError(
+                    HttpStatusCode.InternalServerError,
+                    ErrorSubCode.GatewayTranslationGeneric,
+                    ex.Message
                 );
             }
+        }
+
+        private ActionResult<Translation> FormatTranslationError(HttpStatusCode status, ErrorSubCode subcode, string message)
+        {
+            return StatusCode(
+                (int)status,
+                new Translation()
+                {
+                    Error = new Error()
+                    {
+                        Code = (int)status * 1000 + (int)subcode,
+                        Message = message
+                    }
+                }
+            );
         }
     }
 }
