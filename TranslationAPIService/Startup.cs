@@ -23,9 +23,20 @@ namespace Tilde.MT.TranslationAPIService
 
         public IConfiguration Configuration { get; }
 
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                                  builder =>
+                                  {
+                                      builder.WithOrigins("http://localhost:4200");
+                                  });
+            });
             var serviceConfiguration = Configuration.GetSection("Services").Get<ConfigurationServices>();
             var configurationSettings = Configuration.GetSection("Configuration").Get<ConfigurationSettings>();
             services.Configure<ConfigurationServices>(Configuration.GetSection("Services"));
@@ -109,7 +120,7 @@ namespace Tilde.MT.TranslationAPIService
             app.UseRouting();
 
             app.UseAuthorization();
-
+            app.UseCors(MyAllowSpecificOrigins);
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
