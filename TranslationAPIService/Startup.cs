@@ -88,7 +88,7 @@ namespace Tilde.MT.TranslationAPIService
                 });
             });
 
-            services.AddMassTransitHostedService(true);
+            services.AddMassTransitHostedService(false);
 
             services.AddSingleton<DomainDetectionService>();
             services.AddSingleton<TranslationService>();
