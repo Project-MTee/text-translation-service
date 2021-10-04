@@ -110,7 +110,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                         {
                             Error = new Error()
                             {
-                                Code = response.StatusCode + (int)ErrorSubCode.WorkerTranslationGeneric,
+                                Code = response.StatusCode * 1000 + (int)ErrorSubCode.WorkerTranslationGeneric,
                                 Message = response.Status
                             }
                         }
