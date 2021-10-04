@@ -18,7 +18,13 @@ namespace Tilde.MT.TranslationAPIService.Enums
 
         GatewayTranslationTimedOut = 3,
         GatewayTranslationGeneric = 4,
-        WorkerTranslationGeneric = 5
+        WorkerTranslationGeneric = 5,
+
+        #endregion
+
+        #region
+
+        GatewayLanguageDirectionNotFound = 6
 
         #endregion
     }

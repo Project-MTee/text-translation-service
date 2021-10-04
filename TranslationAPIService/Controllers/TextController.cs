@@ -2,6 +2,7 @@
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Linq;
@@ -9,6 +10,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Enums;
 using Tilde.MT.TranslationAPIService.Models;
+using Tilde.MT.TranslationAPIService.Models.Configuration;
 using Tilde.MT.TranslationAPIService.Models.Translation;
 using Tilde.MT.TranslationAPIService.Services;
 
@@ -25,18 +27,21 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         private readonly IMapper _mapper;
         private readonly TranslationService _translationService;
         private readonly DomainDetectionService _domainDetectionService;
+        private readonly ConfigurationSettings _configurationSettings;
 
         public TextController(
             ILogger<TextController> logger, 
             IMapper mapper,
             TranslationService translationService,
-            DomainDetectionService domainDetectionService
+            DomainDetectionService domainDetectionService,
+            IOptions<ConfigurationSettings> configurationSettings
         )
         {
             _logger = logger;
             _mapper = mapper;
             _translationService = translationService;
             _domainDetectionService = domainDetectionService;
+            _configurationSettings = configurationSettings.Value;
         }
 
         /// <summary>
@@ -50,6 +55,27 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         [SwaggerResponse((int)HttpStatusCode.GatewayTimeout, Description = "Request timed out.", Type=typeof(APIResponse))]
         public async Task<ActionResult<Translation>> GetTranslation(Models.Translation.RequestTranslation request)
         {
+            // check if language direction exists.
+            var languageDirectionInSettings = _configurationSettings.LanguageDirections.Find(item => {
+                return item.Domain == request.Domain &&
+                    item.SourceLanguage == request.SourceLanguage &&
+                    item.TargetLanguage == request.Domain;
+            });
+            if (languageDirectionInSettings == null)
+            {
+                return StatusCode(
+                    (int)HttpStatusCode.NotFound,
+                    new Translation()
+                    {
+                        Error = new Error()
+                        {
+                            Code = (int)HttpStatusCode.NotFound * 1000 + (int)ErrorSubCode.GatewayLanguageDirectionNotFound,
+                            Message = "Language direction is not found"
+                        }
+                    }
+                );
+            }
+
             var translationMessage = _mapper.Map<Models.RabbitMQ.Translation.TranslationRequest>(request);
             translationMessage.InputType = TranslationType.plain.ToString();
             if (string.IsNullOrEmpty(request.Domain))
