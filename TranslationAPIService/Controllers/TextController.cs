@@ -60,7 +60,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
             var languageDirectionInSettings = _configurationSettings.LanguageDirections.Find(item => {
                 return item.Domain == request.Domain &&
                     item.SourceLanguage == request.SourceLanguage &&
-                    item.TargetLanguage == request.Domain;
+                    item.TargetLanguage == request.TargetLanguage;
             });
             if (languageDirectionInSettings == null)
             {
