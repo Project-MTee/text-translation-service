@@ -11,7 +11,7 @@ class DummyWorker():
         self.__logger = logging.getLogger('DummyWorker')
 
         self.__exchange = os.environ.get("RABBITMQ_EXCHANGE", "translation")
-        self.__queue = os.environ.get("RABBITMQ_EXCHANGE", "translation.en.lv.finance.plain")
+        self.__queue = os.environ.get("RABBITMQ_EXCHANGE", "translation.en.et.general.plain")
         self.__routing_key = self.__queue
 
         self.__username = os.environ.get("RABBITMQ_USER", "root")

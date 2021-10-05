@@ -6,10 +6,10 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <AssemblyName>Tilde.MT.TranslationAPIService</AssemblyName>
     <RootNamespace>Tilde.MT.TranslationAPIService</RootNamespace>
+    <DocumentationFile>Tilde.MT.TranslationAPIService.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>Tilde.MT.TranslationAPIService.xml</DocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 

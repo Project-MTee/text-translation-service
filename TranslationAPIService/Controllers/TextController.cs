@@ -88,7 +88,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                 }
                 catch (RequestTimeoutException)
                 {
-                    _logger.LogError("Domain detection timed out");
+                    _logger.LogWarning("Domain detection timed out");
 
                     return FormatTranslationError(
                         HttpStatusCode.GatewayTimeout,
@@ -103,7 +103,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                     return FormatTranslationError(
                         HttpStatusCode.InternalServerError,
                         ErrorSubCode.GatewayDomainDetectionGeneric,
-                        ex.Message
+                        "Domain detection failed due to unkown reason"
                     );
                 }
             }
@@ -114,10 +114,13 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
 
                 if ((HttpStatusCode)response.StatusCode != HttpStatusCode.OK)
                 {
+                    _logger.LogError($"Translation failed, worker error code: {response.StatusCode}, error status: {response.Status}");
+
                     return FormatTranslationError(
-                        (HttpStatusCode)response.StatusCode,
+                        HttpStatusCode.InternalServerError,
                         ErrorSubCode.WorkerTranslationGeneric,
-                        response.Status
+                        response.Status,
+                        messageStatusCode: (HttpStatusCode)response.StatusCode
                     );
                 }
                 else
@@ -135,6 +138,8 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
             }
             catch (RequestTimeoutException)
             {
+                _logger.LogWarning("Translation timed out");
+
                 return FormatTranslationError(
                     HttpStatusCode.GatewayTimeout,
                     ErrorSubCode.GatewayTranslationTimedOut,
@@ -148,12 +153,12 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                 return FormatTranslationError(
                     HttpStatusCode.InternalServerError,
                     ErrorSubCode.GatewayTranslationGeneric,
-                    ex.Message
+                    "Translation failed due to unkown reason"
                 );
             }
         }
 
-        private ActionResult<Translation> FormatTranslationError(HttpStatusCode status, ErrorSubCode subcode, string message)
+        private ActionResult<Translation> FormatTranslationError(HttpStatusCode status, ErrorSubCode subcode, string message, HttpStatusCode? messageStatusCode = null)
         {
             return StatusCode(
                 (int)status,
@@ -161,7 +166,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                 {
                     Error = new Error()
                     {
-                        Code = (int)status * 1000 + (int)subcode,
+                        Code = (int)(messageStatusCode ?? status) * 1000 + (int)subcode,
                         Message = message
                     }
                 }

@@ -22,7 +22,7 @@ namespace Tilde.MT.TranslationAPIService.Enums
 
         #endregion
 
-        #region
+        #region Language direction errors
 
         GatewayLanguageDirectionNotFound = 6
 
