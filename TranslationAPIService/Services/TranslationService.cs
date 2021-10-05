@@ -18,7 +18,7 @@ namespace Tilde.MT.TranslationAPIService.Services
 
         public TranslationService(
             IOptions<ConfigurationSettings> configurationSettings,
-            ILogger<DomainDetectionService> logger,
+            ILogger<TranslationService> logger,
             IBus bus
         )
         {

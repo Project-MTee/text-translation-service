@@ -18,5 +18,8 @@ namespace Tilde.MT.TranslationAPIService.Models.Translation
         /// </summary>
         [JsonPropertyName("translations")]
         public List<TranslationItem> Translations { get; set; }
+
+        [JsonPropertyName("error")]
+        public Error Error { get; set; }
     }
 }

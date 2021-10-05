@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Tilde.MT.TranslationAPIService.Models
 {
-    public class APIResponse
+    public interface APIResponse
     {
         public Error Error { get; set; }
     }
