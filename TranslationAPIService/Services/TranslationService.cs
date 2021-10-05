@@ -13,25 +13,24 @@ namespace Tilde.MT.TranslationAPIService.Services
     public class TranslationService
     {
         private readonly ConfigurationSettings _configurationSettings;
-        private readonly IRequestClient<TranslationRequest> _client;
+        private readonly IRequestClient<TranslationRequest> _requestClient;
         private readonly ILogger _logger;
 
         public TranslationService(
             IOptions<ConfigurationSettings> configurationSettings,
             ILogger<TranslationService> logger,
-            IBus bus
+            IRequestClient<TranslationRequest> requestClient
         )
         {
             _configurationSettings = configurationSettings.Value;
             _logger = logger;
 
-            var addr = new Uri($"exchange:translation?type=direct&durable=false");
-            _client = bus.CreateRequestClient<TranslationRequest>(addr);
+            _requestClient = requestClient;
         }
 
         public async Task<TranslationResponse> Translate(TranslationRequest translationRequest)
         {
-            using var request = _client.Create(translationRequest, timeout: _configurationSettings.TranslationTimeout);
+            using var request = _requestClient.Create(translationRequest, timeout: _configurationSettings.TranslationTimeout);
             request.UseExecute(x => x.AddRequestHeaders<TranslationResponse>());
             var translationResponse = await request.GetResponse<TranslationResponse>();
 

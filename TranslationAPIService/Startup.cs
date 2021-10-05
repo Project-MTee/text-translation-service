@@ -11,6 +11,7 @@ using Tilde.MT.TranslationAPIService.Models.Configuration;
 using AutoMapper;
 using Tilde.MT.TranslationAPIService.Models.Mappings;
 using Tilde.MT.TranslationAPIService.Services;
+using RabbitMQ.Client;
 
 namespace Tilde.MT.TranslationAPIService
 {
@@ -71,6 +72,17 @@ namespace Tilde.MT.TranslationAPIService
                         host.Password(serviceConfiguration.RabbitMQ.Password);
                     });
 
+                    #region Translation configuration
+
+                    config.Message<Models.RabbitMQ.Translation.TranslationRequest>(x =>
+                    {
+                        x.SetEntityName("translation");
+                    });
+                    config.Publish<Models.RabbitMQ.Translation.TranslationRequest>(x =>
+                    {
+                        x.ExchangeType = ExchangeType.Direct;
+                        x.Durable = false;
+                    });
                     config.Send<Models.RabbitMQ.Translation.TranslationRequest>(x =>
                     {
                         x.UseRoutingKeyFormatter(context =>
@@ -81,6 +93,19 @@ namespace Tilde.MT.TranslationAPIService
                         x.UseCorrelationId(context => Guid.NewGuid());
                     });
 
+                    #endregion
+
+                    #region Domain detection configuration
+
+                    config.Message<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>(x =>
+                    {
+                        x.SetEntityName("domain-detection");
+                    });
+                    config.Publish<Models.RabbitMQ.Translation.TranslationRequest>(x =>
+                    {
+                        x.ExchangeType = ExchangeType.Direct;
+                        x.Durable = false;
+                    });
                     config.Send<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>(x =>
                     {
                         x.UseRoutingKeyFormatter(context =>
@@ -90,6 +115,8 @@ namespace Tilde.MT.TranslationAPIService
 
                         x.UseCorrelationId(context => Guid.NewGuid());
                     });
+
+                    #endregion
 
                     config.ConfigureEndpoints(context);
 
@@ -101,8 +128,8 @@ namespace Tilde.MT.TranslationAPIService
 
             services.AddMassTransitHostedService(false);
 
-            services.AddSingleton<DomainDetectionService>();
-            services.AddSingleton<TranslationService>();
+            services.AddScoped<DomainDetectionService>();
+            services.AddScoped<TranslationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

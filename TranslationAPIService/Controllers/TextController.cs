@@ -58,9 +58,12 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         {
             // check if language direction exists.
             var languageDirectionInSettings = _configurationSettings.LanguageDirections.Find(item => {
-                return item.Domain == request.Domain &&
-                    item.SourceLanguage == request.SourceLanguage &&
+                var languageMatches = item.SourceLanguage == request.SourceLanguage &&
                     item.TargetLanguage == request.TargetLanguage;
+
+                var domainMatches = string.IsNullOrEmpty(request.Domain) ? true: item.Domain == request.Domain;
+
+                return domainMatches && languageMatches;
             });
             if (languageDirectionInSettings == null)
             {

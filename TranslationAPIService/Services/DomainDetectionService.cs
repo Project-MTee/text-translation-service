@@ -13,25 +13,23 @@ namespace Tilde.MT.TranslationAPIService.Services
     public class DomainDetectionService
     {
         private readonly ConfigurationSettings _configurationSettings;
-        private readonly IRequestClient<DomainDetectionRequest> _client;
+        private readonly IRequestClient<DomainDetectionRequest> _requestClient;
         private readonly ILogger _logger;
 
         public DomainDetectionService(
             IOptions<ConfigurationSettings> configurationSettings,
             ILogger<DomainDetectionService> logger,
-            IBus bus
+            IRequestClient<DomainDetectionRequest> requestClient
         )
         {
             _configurationSettings = configurationSettings.Value;
             _logger = logger;
-
-            var addr = new Uri($"exchange:domain-detection?type=direct&durable=false");
-            _client = bus.CreateRequestClient<DomainDetectionRequest>(addr);
+            _requestClient = requestClient;
         }
 
         public async Task<DomainDetectionResponse> Detect(DomainDetectionRequest detectionRequest)
         {
-            using var request = _client.Create(detectionRequest, timeout: _configurationSettings.DomainDetectionTimeout);
+            using var request = _requestClient.Create(detectionRequest, timeout: _configurationSettings.DomainDetectionTimeout);
             request.UseExecute(x => x.AddRequestHeaders<DomainDetectionResponse>());
             var translationResponse = await request.GetResponse<DomainDetectionResponse>();
 
