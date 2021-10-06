@@ -74,15 +74,20 @@ namespace Tilde.MT.TranslationAPIService
 
                     #region Translation configuration
 
+                    // Specify exchange 
                     config.Message<Models.RabbitMQ.Translation.TranslationRequest>(x =>
                     {
                         x.SetEntityName("translation");
                     });
+
+                    // Set exchange options
                     config.Publish<Models.RabbitMQ.Translation.TranslationRequest>(x =>
                     {
                         x.ExchangeType = ExchangeType.Direct;
                         x.Durable = false;
                     });
+
+                    // Set message attributes
                     config.Send<Models.RabbitMQ.Translation.TranslationRequest>(x =>
                     {
                         x.UseRoutingKeyFormatter(context =>
@@ -97,15 +102,20 @@ namespace Tilde.MT.TranslationAPIService
 
                     #region Domain detection configuration
 
+                    // Specify exchange 
                     config.Message<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>(x =>
                     {
                         x.SetEntityName("domain-detection");
                     });
-                    config.Publish<Models.RabbitMQ.Translation.TranslationRequest>(x =>
+
+                    // Set exchange options
+                    config.Publish<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>(x =>
                     {
                         x.ExchangeType = ExchangeType.Direct;
                         x.Durable = false;
                     });
+
+                    // Set message attributes
                     config.Send<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>(x =>
                     {
                         x.UseRoutingKeyFormatter(context =>
