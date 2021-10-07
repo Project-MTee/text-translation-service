@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
+﻿
 namespace Tilde.MT.TranslationAPIService.Enums
 {
     public enum ErrorSubCode
     {
-        #region Domain detection errors
+        /*#region Domain detection errors
 
         GatewayDomainDetectionTimedOut = 1,
         GatewayDomainDetectionGeneric = 2,
 
-        #endregion
+        #endregion*/
 
         #region Translation errors
 
@@ -24,7 +20,8 @@ namespace Tilde.MT.TranslationAPIService.Enums
 
         #region Language direction errors
 
-        GatewayLanguageDirectionNotFound = 6
+        GatewayLanguageDirectionNotFound = 6,
+        GatewayLanguageDirectionGeneric = 7
 
         #endregion
     }

@@ -8,5 +8,6 @@ namespace Tilde.MT.TranslationAPIService.Models.Configuration
     public class ConfigurationServices
     {
         public Services.RabbitMQ RabbitMQ { get; set; }
+        public Services.TranslationSystem TranslationSystem { get; set; }
     }
 }

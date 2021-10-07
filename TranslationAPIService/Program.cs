@@ -1,13 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
-using Serilog.Events;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Tilde.MT.TranslationAPIService
 {
@@ -15,30 +10,34 @@ namespace Tilde.MT.TranslationAPIService
     {
         public static void Main(string[] args)
         {
+            ConfigureSerilog();
             CreateHostBuilder(args).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
-                .UseSerilog((host, log) =>
-                {
-                    /*if (host.HostingEnvironment.IsProduction())
-                    {
-                        log.MinimumLevel.Information();
-                    }
-                    else
-                    {
-                        log.MinimumLevel.Verbose();
-                    }*/
-                    log.MinimumLevel.Override("Microsoft", LogEventLevel.Warning);
-
-                    log.WriteTo.Console();
-                })
+                .UseSerilog()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
                 });
+        }
+
+        private static void ConfigureSerilog()
+        {
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .WriteTo.Debug()
+                .WriteTo.Console()
+                .ReadFrom.Configuration(configuration)
+                .CreateLogger();
         }
     }
 }

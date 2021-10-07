@@ -2,7 +2,6 @@
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Linq;
@@ -10,7 +9,6 @@ using System.Net;
 using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Enums;
 using Tilde.MT.TranslationAPIService.Models;
-using Tilde.MT.TranslationAPIService.Models.Configuration;
 using Tilde.MT.TranslationAPIService.Models.Translation;
 using Tilde.MT.TranslationAPIService.Services;
 
@@ -27,21 +25,21 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         private readonly IMapper _mapper;
         private readonly TranslationService _translationService;
         private readonly DomainDetectionService _domainDetectionService;
-        private readonly ConfigurationSettings _configurationSettings;
+        private readonly LanguageDirectionService _languageDirectionService;
 
         public TextController(
             ILogger<TextController> logger, 
             IMapper mapper,
             TranslationService translationService,
             DomainDetectionService domainDetectionService,
-            IOptions<ConfigurationSettings> configurationSettings
+            LanguageDirectionService languageDirectionService
         )
         {
             _logger = logger;
             _mapper = mapper;
             _translationService = translationService;
             _domainDetectionService = domainDetectionService;
-            _configurationSettings = configurationSettings.Value;
+            _languageDirectionService = languageDirectionService;
         }
 
         /// <summary>
@@ -56,16 +54,28 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         [SwaggerResponse((int)HttpStatusCode.NotFound, Description = "Language direction is not found", Type = typeof(APIResponse))]
         public async Task<ActionResult<Translation>> GetTranslation(Models.Translation.RequestTranslation request)
         {
+            var languageDirections = await _languageDirectionService.Read();
+
+            if(languageDirections == null)
+            {
+                return FormatTranslationError(
+                    HttpStatusCode.NotFound,
+                    ErrorSubCode.GatewayLanguageDirectionGeneric,
+                    "Failed to verify language direction"
+                );
+            }
+
             // check if language direction exists.
-            var languageDirectionInSettings = _configurationSettings.LanguageDirections.Find(item => {
+            var languageDirectionInSettings = languageDirections.Where(item => {
                 var languageMatches = item.SourceLanguage == request.SourceLanguage &&
                     item.TargetLanguage == request.TargetLanguage;
 
-                var domainMatches = string.IsNullOrEmpty(request.Domain) ? true: item.Domain == request.Domain;
+                var domainMatches = string.IsNullOrEmpty(request.Domain) || item.Domain == request.Domain;
 
                 return domainMatches && languageMatches;
             });
-            if (languageDirectionInSettings == null)
+            
+            if (!languageDirectionInSettings.Any())
             {
                 return FormatTranslationError(
                     HttpStatusCode.NotFound,
@@ -93,21 +103,26 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                 {
                     _logger.LogWarning("Domain detection timed out");
 
-                    return FormatTranslationError(
+                    translationMessage.Domain = "general";
+
+                    /*return FormatTranslationError(
                         HttpStatusCode.GatewayTimeout,
                         ErrorSubCode.GatewayDomainDetectionTimedOut,
                         "Domain detection timed out"
-                    );
+                    );*/
                 }
                 catch(Exception ex)
                 {
-                    _logger.LogError(ex, "Domain detection failed");
+                    _logger.LogWarning(ex, "Domain detection failed");
 
+                    translationMessage.Domain = "general";
+
+                    /*
                     return FormatTranslationError(
                         HttpStatusCode.InternalServerError,
                         ErrorSubCode.GatewayDomainDetectionGeneric,
                         "Domain detection failed due to unkown reason"
-                    );
+                    );*/
                 }
             }
 
@@ -141,7 +156,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
             }
             catch (RequestTimeoutException)
             {
-                _logger.LogWarning("Translation timed out");
+                _logger.LogError("Translation timed out");
 
                 return FormatTranslationError(
                     HttpStatusCode.GatewayTimeout,

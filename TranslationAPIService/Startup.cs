@@ -29,6 +29,8 @@ namespace Tilde.MT.TranslationAPIService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient();
+            services.AddMemoryCache();
 
             services.AddCors(options =>
             {
@@ -140,6 +142,7 @@ namespace Tilde.MT.TranslationAPIService
 
             services.AddScoped<DomainDetectionService>();
             services.AddScoped<TranslationService>();
+            services.AddSingleton<LanguageDirectionService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

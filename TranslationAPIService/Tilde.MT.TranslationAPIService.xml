@@ -4,17 +4,6 @@
         <name>Tilde.MT.TranslationAPIService</name>
     </assembly>
     <members>
-        <member name="T:Tilde.MT.TranslationAPIService.Controllers.LanguageDirectionController">
-            <summary>
-            API for language directions
-            </summary>
-        </member>
-        <member name="M:Tilde.MT.TranslationAPIService.Controllers.LanguageDirectionController.Get">
-            <summary>
-            Get available language directions
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:Tilde.MT.TranslationAPIService.TranslationAPI.Controllers.TextController">
             <summary>
             API for text translation
@@ -26,6 +15,36 @@
             </summary>
             <param name="request"></param>
             <returns></returns>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.Error.Code">
+            <summary>
+            Error code
+            </summary>
+            <example>500</example>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.Error.Message">
+            <summary>
+            Textual message of error
+            </summary>
+            <example>Error message</example>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.LanguageDirections.LanguageDirection.SourceLanguage">
+            <summary>
+            The language of the source text. Two-byte languge code accordding to ISO 639-1.
+            </summary>
+            <example>en</example>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.LanguageDirections.LanguageDirection.TargetLanguage">
+            <summary>
+            The language to translate text to. Two-byte languge code according to ISO 639-1.
+            </summary>
+            <example>et</example>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.LanguageDirections.LanguageDirection.Domain">
+            <summary>
+            Text domain of the translation system to use for producing the translation.
+            </summary>
+            <example>general</example>
         </member>
         <member name="P:Tilde.MT.TranslationAPIService.Models.RabbitMQ.DomainDetection.DomainDetectionRequest.Text">
             <summary>
@@ -61,31 +80,42 @@
             <summary>
             The language of the source text. Two-byte languge code accordding to ISO 639-1.
             </summary>
+            <example>en</example>
         </member>
         <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.RequestTranslation.TargetLanguage">
             <summary>
             The language to translate text to. Two-byte languge code according to ISO 639-1.
             </summary>
+            <example>et</example>
         </member>
         <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.RequestTranslation.Domain">
             <summary>
-            (Optional) Text domain of the translation system to use for producing the translation. The domain is going to be detected automatically if not specified.
+            (Optional) Text domain of the translation system to use for producing the translation.The domain is going to be detected automatically if not specified.
             </summary>
+            <example>general</example>
         </member>
         <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.RequestTranslation.Text">
             <summary>
             Array of text segments to translate
+            </summary>
+            <example>["Segment to translate"]</example>
+        </member>
+        <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.RequestTranslation.InputType">
+            <summary>
+            Input text type. Default: plaintext
             </summary>
         </member>
         <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.Translation.Domain">
             <summary>
             The text domain of the translation system used to produce the translation. This property contain automatically detected domain if not specified within the request.
             </summary>
+            <example>general</example>
         </member>
         <member name="P:Tilde.MT.TranslationAPIService.Models.Translation.Translation.Translations">
             <summary>
             Translation results
             </summary>
+            <example>[{"translation":"Translated segment"}]</example>
         </member>
         <member name="T:Tilde.MT.TranslationAPIService.Models.Translation.TranslationItem">
             <summary>
