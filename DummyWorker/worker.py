@@ -84,7 +84,7 @@ class DummyWorker():
 
         self.__logger.info("RabbitMQ stoped")
 
-logging.basicConfig(level=logging.NOTSET,
+logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s %(levelname)-8s [%(name)s:%(funcName)s:%(lineno)d] %(message)s")
 
 worker = DummyWorker()

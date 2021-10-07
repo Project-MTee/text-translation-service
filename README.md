@@ -6,22 +6,26 @@ Public text translation service which communicates through **RabbitMQ** to send 
 
  -------------------------------
 |                               |
+|                               |
 |    Translation API Service    |
+|           [Public]            |
 |                               |
  -------------------------------
 
-                Requests info about detected domains
+          ↑  ↓
+          ↑  ↓
+          ↑  ↓  Requests info about detected domains
           ↑  ↓        -------------------------------
-                →    |                               |
-                ←    |        Domain detector        |
-                     |                               |
-                      -------------------------------
-
-
-                Requests translation from MT systems
+          ↑  ↓ → → → |                               |
+          ↑  ↓ ← ← ← |        Domain detector        |
+          ↑  ↓       |                               |
           ↑  ↓        -------------------------------
-                →    |                               |
-                ←    |          MT system            |
+          ↑  ↓
+          ↑  ↓
+          ↑  ↓  Requests translation from MT systems
+          ↑  ↓        -------------------------------
+          ↑  ↓ → → → |                               |
+          ↑ ← ← ← ←  |          MT system            |
                      |                               |
                       -------------------------------
 

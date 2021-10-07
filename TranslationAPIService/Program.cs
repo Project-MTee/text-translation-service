@@ -23,14 +23,14 @@ namespace Tilde.MT.TranslationAPIService
             return Host.CreateDefaultBuilder(args)
                 .UseSerilog((host, log) =>
                 {
-                    if (host.HostingEnvironment.IsProduction())
+                    /*if (host.HostingEnvironment.IsProduction())
                     {
                         log.MinimumLevel.Information();
                     }
                     else
                     {
                         log.MinimumLevel.Verbose();
-                    }
+                    }*/
                     log.MinimumLevel.Override("Microsoft", LogEventLevel.Warning);
 
                     log.WriteTo.Console();
