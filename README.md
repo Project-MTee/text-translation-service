@@ -32,15 +32,22 @@ Public text translation service which communicates through **RabbitMQ** to send 
 ```
 # Test
 
-Deploy RabbitMQ
+Install prerequisites
 
-Install RabbitMQ
+```Shell
+# install kubectl
+choco install kubernetes-cli
+# install helm
+choco install kubernetes-helm
+```
+
+Install and deploy RabbitMQ
 
 ```Shell
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
 helm install test --set auth.username=root,auth.password=root,auth.erlangCookie=secretcookie bitnami/rabbitmq
-helm delete test
+# helm delete test
 ```
 
 forward ports:
