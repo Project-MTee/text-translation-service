@@ -49,7 +49,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(Translation))]
-        [SwaggerResponse((int)HttpStatusCode.BadRequest, Description = "Missing or incorrect parameters. See the responce for more details.", Type =typeof(APIError))]
+        [SwaggerResponse((int)HttpStatusCode.BadRequest, Description = "Missing or incorrect parameters. See the response for more details.", Type =typeof(APIError))]
         [SwaggerResponse((int)HttpStatusCode.InternalServerError, Description = "An unexpected error occured. See the response for more details.", Type=typeof(APIError))]
         [SwaggerResponse((int)HttpStatusCode.GatewayTimeout, Description = "Request timed out.", Type=typeof(APIError))]
         [SwaggerResponse((int)HttpStatusCode.NotFound, Description = "Language direction is not found", Type = typeof(APIError))]

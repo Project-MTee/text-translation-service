@@ -21,6 +21,10 @@ namespace Tilde.MT.TranslationAPIService
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseKestrel(options =>
+                    { 
+                        options.Limits.MaxRequestBodySize = 20480; // 20KB
+                    });
                 });
         }
 

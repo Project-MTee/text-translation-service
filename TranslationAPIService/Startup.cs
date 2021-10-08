@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using Tilde.MT.TranslationAPIService.Models;
 using System.Text.Json;
 using Serilog;
+using System.Linq;
 
 namespace Tilde.MT.TranslationAPIService
 {
@@ -153,19 +154,43 @@ namespace Tilde.MT.TranslationAPIService
             services.AddSingleton<LanguageDirectionService>();
 
             // Catch client errors
-            services.Configure<ApiBehaviorOptions>(options=> {
+            services.Configure<ApiBehaviorOptions>(options => {
                 options.InvalidModelStateResponseFactory = actionContext =>
                 {
-                    return new BadRequestObjectResult(
-                        new APIError()
-                        {
-                            Error = new Error()
+                    var modelStateEntries = actionContext.ModelState.Where(e => e.Value.Errors.Count > 0).ToArray();
+                    var requestTooLarge = modelStateEntries.Where(item =>
+                    {
+                        return item.Value.Errors.Where(err => err.ErrorMessage.Contains("Request body too large")).Any();
+                    }).Any();
+
+                    if (requestTooLarge)
+                    {
+                        actionContext.HttpContext.Response.StatusCode = (int)HttpStatusCode.RequestEntityTooLarge;
+
+                        return new JsonResult(
+                            new APIError()
                             {
-                                Code = ((int)HttpStatusCode.BadRequest) * 1000 + (int)Enums.ErrorSubCode.GatewayGeneric,
-                                Message = "Request validation failed"
+                                Error = new Error()
+                                {
+                                    Code = ((int)HttpStatusCode.RequestEntityTooLarge) * 1000 + (int)Enums.ErrorSubCode.GatewayRequestTooLarge,
+                                    Message = "Request too large"
+                                }
                             }
-                        }
-                    );
+                        );
+                    }
+                    else
+                    {
+                        return new BadRequestObjectResult(
+                            new APIError()
+                            {
+                                Error = new Error()
+                                {
+                                    Code = ((int)HttpStatusCode.BadRequest) * 1000 + (int)Enums.ErrorSubCode.GatewayGeneric,
+                                    Message = "Request validation failed"
+                                }
+                            }
+                        );
+                    }
                 };
             });
         }
@@ -179,25 +204,45 @@ namespace Tilde.MT.TranslationAPIService
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TranslationAPI v1"));
             }
 
+            // Catch all unexpected errors
             app.UseExceptionHandler(appError =>
             {
                 appError.Run(async context =>
                 {
+
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     context.Response.ContentType = "application/json";
                     var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
                     if (contextFeature != null)
                     {
-                        Log.Error($"Unexpected error: {contextFeature.Error}");
-
-                        var response = JsonSerializer.Serialize(new APIError()
+                        string response;
+                        if (contextFeature.Error.Message.Contains("Request body too large"))
                         {
-                            Error = new Error()
+                            context.Response.StatusCode = (int)HttpStatusCode.RequestEntityTooLarge;
+                            Log.Error($"Request too large: {contextFeature.Error}");
+
+                            response = JsonSerializer.Serialize(new APIError()
                             {
-                                Code = ((int)HttpStatusCode.InternalServerError) * 1000 + (int)Enums.ErrorSubCode.GatewayGeneric,
-                                Message = "An unexpected error occured."
-                            }
-                        });
+                                Error = new Error()
+                                {
+                                    Code = ((int)HttpStatusCode.RequestEntityTooLarge) * 1000 + (int)Enums.ErrorSubCode.GatewayRequestTooLarge,
+                                    Message = "Request too large"
+                                }
+                            });
+                        }
+                        else
+                        {
+                            Log.Error($"Unexpected error: {contextFeature.Error}");
+                            response = JsonSerializer.Serialize(new APIError()
+                            {
+                                Error = new Error()
+                                {
+                                    Code = ((int)HttpStatusCode.InternalServerError) * 1000 + (int)Enums.ErrorSubCode.GatewayGeneric,
+                                    Message = "An unexpected error occured."
+                                }
+                            });
+                        }
+
                         await context.Response.WriteAsync(response);
                     }
                 });

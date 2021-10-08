@@ -25,6 +25,7 @@ namespace Tilde.MT.TranslationAPIService.Enums
 
         #endregion
 
-        GatewayGeneric = 8
+        GatewayGeneric = 8,
+        GatewayRequestTooLarge = 9
     }
 }
