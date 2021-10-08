@@ -14,17 +14,13 @@ namespace Tilde.MT.TranslationAPIService.Services
     {
         private readonly ConfigurationSettings _configurationSettings;
         private readonly IRequestClient<TranslationRequest> _requestClient;
-        private readonly ILogger _logger;
 
         public TranslationService(
             IOptions<ConfigurationSettings> configurationSettings,
-            ILogger<TranslationService> logger,
             IRequestClient<TranslationRequest> requestClient
         )
         {
             _configurationSettings = configurationSettings.Value;
-            _logger = logger;
-
             _requestClient = requestClient;
         }
 

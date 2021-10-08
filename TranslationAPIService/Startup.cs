@@ -12,6 +12,12 @@ using AutoMapper;
 using Tilde.MT.TranslationAPIService.Models.Mappings;
 using Tilde.MT.TranslationAPIService.Services;
 using RabbitMQ.Client;
+using System.Net;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
+using Tilde.MT.TranslationAPIService.Models;
 
 namespace Tilde.MT.TranslationAPIService
 {
@@ -143,6 +149,23 @@ namespace Tilde.MT.TranslationAPIService
             services.AddScoped<DomainDetectionService>();
             services.AddScoped<TranslationService>();
             services.AddSingleton<LanguageDirectionService>();
+
+            // Catch client errors
+            services.Configure<ApiBehaviorOptions>(options=> {
+                options.InvalidModelStateResponseFactory = actionContext =>
+                {
+                    return new BadRequestObjectResult(
+                        new APIError()
+                        {
+                            Error = new Error()
+                            {
+                                Code = ((int)HttpStatusCode.BadRequest) * 1000 + (int)Enums.ErrorSubCode.GatewayGeneric,
+                                Message = "Request validation failed"
+                            }
+                        }
+                    );
+                };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -150,7 +173,6 @@ namespace Tilde.MT.TranslationAPIService
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TranslationAPI v1"));
             }

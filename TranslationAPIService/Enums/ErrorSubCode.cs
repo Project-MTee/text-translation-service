@@ -21,8 +21,10 @@ namespace Tilde.MT.TranslationAPIService.Enums
         #region Language direction errors
 
         GatewayLanguageDirectionNotFound = 6,
-        GatewayLanguageDirectionGeneric = 7
+        GatewayLanguageDirectionGeneric = 7,
 
         #endregion
+
+        GatewayGeneric = 8
     }
 }

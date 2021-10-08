@@ -49,14 +49,15 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(Translation))]
-        [SwaggerResponse((int)HttpStatusCode.InternalServerError, Description = "An unexpected error occured. See the response for more details.", Type=typeof(APIResponse))]
-        [SwaggerResponse((int)HttpStatusCode.GatewayTimeout, Description = "Request timed out.", Type=typeof(APIResponse))]
-        [SwaggerResponse((int)HttpStatusCode.NotFound, Description = "Language direction is not found", Type = typeof(APIResponse))]
+        [SwaggerResponse((int)HttpStatusCode.BadRequest, Description = "Missing or incorrect parameters. See the responce for more details.", Type =typeof(APIError))]
+        [SwaggerResponse((int)HttpStatusCode.InternalServerError, Description = "An unexpected error occured. See the response for more details.", Type=typeof(APIError))]
+        [SwaggerResponse((int)HttpStatusCode.GatewayTimeout, Description = "Request timed out.", Type=typeof(APIError))]
+        [SwaggerResponse((int)HttpStatusCode.NotFound, Description = "Language direction is not found", Type = typeof(APIError))]
         public async Task<ActionResult<Translation>> GetTranslation(Models.Translation.RequestTranslation request)
         {
             var languageDirections = await _languageDirectionService.Read();
 
-            if(languageDirections == null)
+            if (languageDirections == null)
             {
                 return FormatTranslationError(
                     HttpStatusCode.NotFound,
@@ -66,7 +67,8 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
             }
 
             // check if language direction exists.
-            var languageDirectionInSettings = languageDirections.Where(item => {
+            var languageDirectionInSettings = languageDirections.Where(item =>
+            {
                 var languageMatches = item.SourceLanguage == request.SourceLanguage &&
                     item.TargetLanguage == request.TargetLanguage;
 
@@ -74,7 +76,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
 
                 return domainMatches && languageMatches;
             });
-            
+
             if (!languageDirectionInSettings.Any())
             {
                 return FormatTranslationError(
@@ -85,7 +87,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
             }
 
             var translationMessage = _mapper.Map<Models.RabbitMQ.Translation.TranslationRequest>(request);
-            translationMessage.InputType = TranslationType.plain.ToString();
+
             if (string.IsNullOrEmpty(request.Domain))
             {
                 try
@@ -111,7 +113,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                         "Domain detection timed out"
                     );*/
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Domain detection failed");
 
@@ -180,7 +182,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         {
             return StatusCode(
                 (int)status,
-                new Translation()
+                new APIError()
                 {
                     Error = new Error()
                     {

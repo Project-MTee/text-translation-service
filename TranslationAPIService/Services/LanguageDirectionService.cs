@@ -15,11 +15,11 @@ namespace Tilde.MT.TranslationAPIService.Services
     public class LanguageDirectionService
     {
         private readonly ILogger _logger;
-        private IMemoryCache _cache;
+        private readonly IMemoryCache _cache;
         private readonly IHttpClientFactory _clientFactory;
         private readonly ConfigurationServices _serviceConfiguration;
 
-        private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
         
         public LanguageDirectionService(
             ILogger<LanguageDirectionService> logger,

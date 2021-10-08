@@ -46,6 +46,6 @@ namespace Tilde.MT.TranslationAPIService.Models.Translation
         /// Input text type. Default: plaintext
         /// </summary>
         [JsonPropertyName("textType")]
-        public Enums.TranslationType InputType { get; set; }
+        public Enums.TranslationType InputType { get; set; } = Enums.TranslationType.plain;
     }
 }

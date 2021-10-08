@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Tilde.MT.TranslationAPIService.Models.Translation
 {
-    public class Translation: APIResponse
+    public class Translation
     {
         /// <summary>
         /// The text domain of the translation system used to produce the translation. This property contain automatically detected domain if not specified within the request.
@@ -21,8 +18,5 @@ namespace Tilde.MT.TranslationAPIService.Models.Translation
         /// <example>[{"translation":"Translated segment"}]</example>
         [JsonPropertyName("translations")]
         public List<TranslationItem> Translations { get; set; }
-
-        [JsonPropertyName("error")]
-        public Error Error { get; set; }
     }
 }
