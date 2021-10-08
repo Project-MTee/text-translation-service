@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Enums;
+using Tilde.MT.TranslationAPIService.Extensions;
 using Tilde.MT.TranslationAPIService.Models;
 using Tilde.MT.TranslationAPIService.Models.Translation;
 using Tilde.MT.TranslationAPIService.Services;
@@ -60,11 +61,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
 
             if (languageDirections == null)
             {
-                return FormatTranslationError(
-                    HttpStatusCode.InternalServerError,
-                    ErrorSubCode.GatewayLanguageDirectionGeneric,
-                    "Failed to verify language direction"
-                );
+                return FormatAPIError(HttpStatusCode.InternalServerError, ErrorSubCode.GatewayLanguageDirectionGeneric);
             }
 
             // check if language direction exists.
@@ -80,11 +77,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
 
             if (!languageDirectionInSettings.Any())
             {
-                return FormatTranslationError(
-                    HttpStatusCode.NotFound,
-                    ErrorSubCode.GatewayLanguageDirectionNotFound,
-                    "Language direction is not found"
-                );
+                return FormatAPIError(HttpStatusCode.NotFound, ErrorSubCode.GatewayLanguageDirectionNotFound);
             }
 
             var translationMessage = _mapper.Map<Models.RabbitMQ.Translation.TranslationRequest>(request);
@@ -137,10 +130,10 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                 {
                     _logger.LogError($"Translation failed, worker error code: {response.StatusCode}, error status: {response.Status}");
 
-                    return FormatTranslationError(
+                    return FormatAPIError(
                         HttpStatusCode.InternalServerError,
                         ErrorSubCode.WorkerTranslationGeneric,
-                        response.Status,
+                        message: response.Status,
                         messageStatusCode: (HttpStatusCode)response.StatusCode
                     );
                 }
@@ -161,25 +154,17 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
             {
                 _logger.LogError("Translation timed out");
 
-                return FormatTranslationError(
-                    HttpStatusCode.GatewayTimeout,
-                    ErrorSubCode.GatewayTranslationTimedOut,
-                    "Translation timed out"
-                );
+                return FormatAPIError(HttpStatusCode.GatewayTimeout, ErrorSubCode.GatewayTranslationTimedOut);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Translation failed");
 
-                return FormatTranslationError(
-                    HttpStatusCode.InternalServerError,
-                    ErrorSubCode.GatewayTranslationGeneric,
-                    "Translation failed due to unkown reason"
-                );
+                return FormatAPIError(HttpStatusCode.InternalServerError, ErrorSubCode.GatewayTranslationGeneric);
             }
         }
 
-        private ActionResult<Translation> FormatTranslationError(HttpStatusCode status, ErrorSubCode subcode, string message, HttpStatusCode? messageStatusCode = null)
+        private ActionResult<Translation> FormatAPIError(HttpStatusCode status, ErrorSubCode subcode, HttpStatusCode? messageStatusCode = null, string message = null)
         {
             return StatusCode(
                 (int)status,
@@ -188,7 +173,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                     Error = new Error()
                     {
                         Code = (int)(messageStatusCode ?? status) * 1000 + (int)subcode,
-                        Message = message
+                        Message = message ?? subcode.Description()
                     }
                 }
             );

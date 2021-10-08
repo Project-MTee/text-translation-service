@@ -20,6 +20,7 @@ using Tilde.MT.TranslationAPIService.Models;
 using System.Text.Json;
 using Serilog;
 using System.Linq;
+using Tilde.MT.TranslationAPIService.Extensions;
 
 namespace Tilde.MT.TranslationAPIService
 {
@@ -172,7 +173,7 @@ namespace Tilde.MT.TranslationAPIService
                                 Error = new Error()
                                 {
                                     Code = ((int)HttpStatusCode.RequestEntityTooLarge) * 1000 + (int)Enums.ErrorSubCode.GatewayRequestTooLarge,
-                                    Message = "Request too large"
+                                    Message = Enums.ErrorSubCode.GatewayRequestTooLarge.Description()
                                 }
                             }
                         );
@@ -185,7 +186,7 @@ namespace Tilde.MT.TranslationAPIService
                                 Error = new Error()
                                 {
                                     Code = ((int)HttpStatusCode.BadRequest) * 1000 + (int)Enums.ErrorSubCode.GatewayRequestValidation,
-                                    Message = "Request validation failed"
+                                    Message = Enums.ErrorSubCode.GatewayRequestValidation.Description()
                                 }
                             }
                         );
@@ -225,7 +226,7 @@ namespace Tilde.MT.TranslationAPIService
                                 Error = new Error()
                                 {
                                     Code = ((int)HttpStatusCode.RequestEntityTooLarge) * 1000 + (int)Enums.ErrorSubCode.GatewayRequestTooLarge,
-                                    Message = "Request too large"
+                                    Message = Enums.ErrorSubCode.GatewayRequestTooLarge.Description()
                                 }
                             });
                         }
@@ -237,7 +238,7 @@ namespace Tilde.MT.TranslationAPIService
                                 Error = new Error()
                                 {
                                     Code = ((int)HttpStatusCode.InternalServerError) * 1000 + (int)Enums.ErrorSubCode.GatewayGeneric,
-                                    Message = "An unexpected error occured."
+                                    Message = Enums.ErrorSubCode.GatewayGeneric.Description()
                                 }
                             });
                         }
