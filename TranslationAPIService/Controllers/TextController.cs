@@ -49,10 +49,11 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(Translation))]
-        [SwaggerResponse((int)HttpStatusCode.BadRequest, Description = "Missing or incorrect parameters. See the response for more details.", Type =typeof(APIError))]
-        [SwaggerResponse((int)HttpStatusCode.InternalServerError, Description = "An unexpected error occured. See the response for more details.", Type=typeof(APIError))]
-        [SwaggerResponse((int)HttpStatusCode.GatewayTimeout, Description = "Request timed out.", Type=typeof(APIError))]
+        [SwaggerResponse((int)HttpStatusCode.BadRequest, Description = "Missing or incorrect parameters", Type =typeof(APIError))]
+        [SwaggerResponse((int)HttpStatusCode.InternalServerError, Description = "An unexpected error occured", Type=typeof(APIError))]
+        [SwaggerResponse((int)HttpStatusCode.GatewayTimeout, Description = "Request timed out", Type=typeof(APIError))]
         [SwaggerResponse((int)HttpStatusCode.NotFound, Description = "Language direction is not found", Type = typeof(APIError))]
+        [SwaggerResponse((int)HttpStatusCode.RequestEntityTooLarge, Description = "Maximum text size limit reached for the request", Type = typeof(APIError))]
         public async Task<ActionResult<Translation>> GetTranslation(Models.Translation.RequestTranslation request)
         {
             var languageDirections = await _languageDirectionService.Read();
@@ -60,7 +61,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
             if (languageDirections == null)
             {
                 return FormatTranslationError(
-                    HttpStatusCode.NotFound,
+                    HttpStatusCode.InternalServerError,
                     ErrorSubCode.GatewayLanguageDirectionGeneric,
                     "Failed to verify language direction"
                 );

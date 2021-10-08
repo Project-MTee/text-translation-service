@@ -15,7 +15,6 @@ using RabbitMQ.Client;
 using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Tilde.MT.TranslationAPIService.Models;
 using System.Text.Json;
