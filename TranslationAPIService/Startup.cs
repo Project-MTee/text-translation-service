@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Tilde.MT.TranslationAPIService.Models;
+using System.Text.Json;
+using Serilog;
 
 namespace Tilde.MT.TranslationAPIService
 {
@@ -176,6 +178,30 @@ namespace Tilde.MT.TranslationAPIService
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TranslationAPI v1"));
             }
+
+            app.UseExceptionHandler(appError =>
+            {
+                appError.Run(async context =>
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    context.Response.ContentType = "application/json";
+                    var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
+                    if (contextFeature != null)
+                    {
+                        Log.Error($"Unexpected error: {contextFeature.Error}");
+
+                        var response = JsonSerializer.Serialize(new APIError()
+                        {
+                            Error = new Error()
+                            {
+                                Code = ((int)HttpStatusCode.InternalServerError) * 1000 + (int)Enums.ErrorSubCode.GatewayGeneric,
+                                Message = "An unexpected error occured."
+                            }
+                        });
+                        await context.Response.WriteAsync(response);
+                    }
+                });
+            });
 
             //app.UseHttpsRedirection();
 
