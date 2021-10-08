@@ -185,7 +185,7 @@ namespace Tilde.MT.TranslationAPIService
                             {
                                 Error = new Error()
                                 {
-                                    Code = ((int)HttpStatusCode.BadRequest) * 1000 + (int)Enums.ErrorSubCode.GatewayGeneric,
+                                    Code = ((int)HttpStatusCode.BadRequest) * 1000 + (int)Enums.ErrorSubCode.GatewayRequestValidation,
                                     Message = "Request validation failed"
                                 }
                             }
