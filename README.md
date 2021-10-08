@@ -4,30 +4,30 @@ Public text translation service which communicates through **RabbitMQ** to send 
 
 ```
 
- -------------------------------
-|                               |
-|                               |
-|    Translation API Service    |
-|           [Public]            |
-|                               |
+ -------------------------------        Fetch available translation systems for request validation
+|                               |            --------------------------------
+|                               |           |                                |
+|    Translation API Service    |   → → →   |   Translation system service   |
+|           [Public]            |           |                                |
+|                               |            --------------------------------
  -------------------------------
 
           ↑  ↓
           ↑  ↓
           ↑  ↓  Requests info about detected domains
-          ↑  ↓        -------------------------------
-          ↑  ↓ → → → |                               |
-          ↑  ↓ ← ← ← |        Domain detector        |
-          ↑  ↓       |                               |
-          ↑  ↓        -------------------------------
+          ↑  ↓        --------------------------------
+          ↑  ↓ → → → |                                |
+          ↑  ↓ ← ← ← |        Domain detector         |
+          ↑  ↓       |                                |
+          ↑  ↓        --------------------------------
           ↑  ↓
           ↑  ↓
           ↑  ↓  Requests translation from MT systems
-          ↑  ↓        -------------------------------
-          ↑  ↓ → → → |                               |
-          ↑ ← ← ← ←  |          MT system            |
-                     |                               |
-                      -------------------------------
+          ↑  ↓        --------------------------------
+          ↑  ↓ → → → |                                |
+          ↑ ← ← ← ←  |          MT system             |
+                     |                                |
+                      --------------------------------
 
 ```
 # Test
