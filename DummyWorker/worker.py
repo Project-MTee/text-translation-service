@@ -64,7 +64,7 @@ class DummyWorker():
 
                         translations = message_body["text"]
                         for i in range(len(translations)):
-                            translations[i] = "_translated :)_" + translations[i]
+                            translations[i] = "    :D     " + translations[i] if translations[i] else translations[i]
 
                         response = json.dumps({
                             "status":"Im ok",
