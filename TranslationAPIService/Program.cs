@@ -22,7 +22,7 @@ namespace Tilde.MT.TranslationAPIService
                 {
                     webBuilder.UseStartup<Startup>();
                     webBuilder.UseKestrel(options =>
-                    { 
+                    {
                         options.Limits.MaxRequestBodySize = 20480; // 20KB
                     });
                 });
@@ -32,7 +32,9 @@ namespace Tilde.MT.TranslationAPIService
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
+#if DEBUG
+                .AddJsonFile($"appsettings.Development.json", optional: false)
+#endif
                 .AddEnvironmentVariables()
                 .Build();
 

@@ -1,0 +1,16 @@
+services:
+  translation-api-service:
+    build:
+      context: ./
+      dockerfile: ./TranslationAPIService/Dockerfile
+      args:
+        CONFIGURATION: $CONFIGURATION
+    ports:
+      - "5003:80"
+    env_file:
+      - .env
+    environment:
+      Services__TranslationSystem__Url: $Services__TranslationSystem__Url
+      Services__RabbitMQ__Host: $Services__RabbitMQ__Host
+      Services__RabbitMQ__UserName: $Services__RabbitMQ__UserName
+      Services__RabbitMQ__Password: $Services__RabbitMQ__Password

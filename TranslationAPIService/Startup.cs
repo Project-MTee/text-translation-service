@@ -85,7 +85,7 @@ namespace Tilde.MT.TranslationAPIService
 
                     #region Translation configuration
 
-                    // Specify exchange 
+                    // Specify exchange
                     config.Message<Models.RabbitMQ.Translation.TranslationRequest>(x =>
                     {
                         x.SetEntityName("translation");
@@ -113,7 +113,7 @@ namespace Tilde.MT.TranslationAPIService
 
                     #region Domain detection configuration
 
-                    // Specify exchange 
+                    // Specify exchange
                     config.Message<Models.RabbitMQ.DomainDetection.DomainDetectionRequest>(x =>
                     {
                         x.SetEntityName("domain-detection");
@@ -198,11 +198,10 @@ namespace Tilde.MT.TranslationAPIService
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
+#if DEBUG
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TranslationAPI v1"));
-            }
+#endif
 
             // Catch all unexpected errors
             app.UseExceptionHandler(appError =>

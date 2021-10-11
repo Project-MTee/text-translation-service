@@ -6,15 +6,21 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+
+ARG CONFIGURATION=Release
+
 WORKDIR /src
 COPY ["TranslationAPIService/TranslationAPIService.csproj", "TranslationAPIService/"]
 RUN dotnet restore "TranslationAPIService/TranslationAPIService.csproj"
 COPY . .
 WORKDIR "/src/TranslationAPIService"
-RUN dotnet build "TranslationAPIService.csproj" -c Release -o /app/build
+RUN dotnet build "TranslationAPIService.csproj" -c $CONFIGURATION -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "TranslationAPIService.csproj" -c Release -o /app/publish
+
+ARG CONFIGURATION=Release
+
+RUN dotnet publish "TranslationAPIService.csproj" -c $CONFIGURATION -o /app/publish
 
 FROM base AS final
 WORKDIR /app

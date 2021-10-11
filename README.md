@@ -46,12 +46,24 @@ Install and deploy RabbitMQ
 ```Shell
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
-helm install test --set auth.username=root,auth.password=root,auth.erlangCookie=secretcookie bitnami/rabbitmq
-# helm delete test
+
+# RabbitMQ
+helm install rabbitmq --set auth.username=root,auth.password=root,auth.erlangCookie=secretcookie bitnami/rabbitmq
 ```
 
 forward ports:
 
 ```Shell
-kubectl port-forward --namespace default svc/test-rabbitmq 15672:15672 5672:5672
+# RabbitMQ
+kubectl port-forward --namespace default svc/rabbitmq 15672:15672 5672:5672
+```
+
+Using docker compose
+```
+docker-compose up --build
+```
+
+Open Swagger
+```
+http://localhost:5003/swagger/index.html
 ```
