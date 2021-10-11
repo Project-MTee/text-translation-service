@@ -14,3 +14,23 @@ services:
       Services__RabbitMQ__Host: $Services__RabbitMQ__Host
       Services__RabbitMQ__UserName: $Services__RabbitMQ__UserName
       Services__RabbitMQ__Password: $Services__RabbitMQ__Password
+
+  worker1:
+    build:
+      context: ./DummyWorker
+      dockerfile: ./Dockerfile
+    environment:
+      RABBITMQ_QUEUE: translation.en.et.general.plain
+      RABBITMQ_HOST: $Services__RabbitMQ__Host
+      RABBITMQ_USER: $Services__RabbitMQ__UserName
+      RABBITMQ_PASS: $Services__RabbitMQ__Password
+
+  worker2:
+    build:
+      context: ./DummyWorker
+      dockerfile: ./Dockerfile
+    environment:
+      RABBITMQ_QUEUE: translation.et.en.general.plain
+      RABBITMQ_HOST: $Services__RabbitMQ__Host
+      RABBITMQ_USER: $Services__RabbitMQ__UserName
+      RABBITMQ_PASS: $Services__RabbitMQ__Password

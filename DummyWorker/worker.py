@@ -11,7 +11,7 @@ class DummyWorker():
         self.__logger = logging.getLogger('DummyWorker')
 
         self.__exchange = os.environ.get("RABBITMQ_EXCHANGE", "translation")
-        self.__queue = os.environ.get("RABBITMQ_EXCHANGE", "translation.en.et.general.plain")
+        self.__queue = os.environ.get("RABBITMQ_QUEUE", "translation.en.et.general.plain")
         self.__routing_key = self.__queue
 
         self.__username = os.environ.get("RABBITMQ_USER", "root")
@@ -19,10 +19,13 @@ class DummyWorker():
         self.__host = os.environ.get("RABBITMQ_HOST", "localhost")
         self.__port = int(os.environ.get("RABBITMQ_PORT", "5672"))
 
+        self.__logger.info(f"queue: {self.__queue}")
+        self.__logger.info(f"rabbitMQ host: {self.__host}")
+
     def listen(self):
         self.__logger.info("listen init")
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.new_event_loop()
         loop.run_until_complete(self.__main_loop(loop))
         loop.close()
 
