@@ -15,20 +15,54 @@ services:
       Services__RabbitMQ__UserName: $Services__RabbitMQ__UserName
       Services__RabbitMQ__Password: $Services__RabbitMQ__Password
 
-  worker1:
+  # domain-detection:
+  #   image: ghcr.io/project-mtee/domain-detection-worker:latest
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     MQ_USERNAME: $Services__RabbitMQ__UserName
+  #     MQ_PASSWORD: $Services__RabbitMQ__Password
+  #     MQ_HOST: $Services__RabbitMQ__Host
+
+  # worker_eu_et:
+  #   image: ghcr.io/project-mtee/translation-worker:ru-et.general
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     MQ_USERNAME: $Services__RabbitMQ__UserName
+  #     MQ_PASSWORD: $Services__RabbitMQ__Password
+  #     MQ_HOST: $Services__RabbitMQ__Host
+
+  dummy_worker_domain_en_et:
     build:
-      context: ./DummyWorker
+      context: ./DummyWorker/domain-detection
       dockerfile: ./Dockerfile
+    env_file:
+      - .env
+    environment:
+      RABBITMQ_QUEUE: domain-detection.en
+      RABBITMQ_HOST: $Services__RabbitMQ__Host
+      RABBITMQ_USER: $Services__RabbitMQ__UserName
+      RABBITMQ_PASS: $Services__RabbitMQ__Password
+
+  dummy_worker_translation_en_et:
+    build:
+      context: ./DummyWorker/translation
+      dockerfile: ./Dockerfile
+    env_file:
+      - .env
     environment:
       RABBITMQ_QUEUE: translation.en.et.general.plain
       RABBITMQ_HOST: $Services__RabbitMQ__Host
       RABBITMQ_USER: $Services__RabbitMQ__UserName
       RABBITMQ_PASS: $Services__RabbitMQ__Password
 
-  worker2:
+  dummy_worker_translation_et_en:
     build:
-      context: ./DummyWorker
+      context: ./DummyWorker/translation
       dockerfile: ./Dockerfile
+    env_file:
+      - .env
     environment:
       RABBITMQ_QUEUE: translation.et.en.general.plain
       RABBITMQ_HOST: $Services__RabbitMQ__Host

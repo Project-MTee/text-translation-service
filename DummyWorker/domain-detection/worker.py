@@ -10,8 +10,8 @@ class DummyWorker():
     def __init__(self):
         self.__logger = logging.getLogger('DummyWorker')
 
-        self.__exchange = os.environ.get("RABBITMQ_EXCHANGE", "translation")
-        self.__queue = os.environ.get("RABBITMQ_QUEUE", "translation.en.et.general.plain")
+        self.__exchange = os.environ.get("RABBITMQ_EXCHANGE", "domain-detection")
+        self.__queue = os.environ.get("RABBITMQ_QUEUE", "domain-detection.en")
         self.__routing_key = self.__queue
 
         self.__username = os.environ.get("RABBITMQ_USER", "root")
@@ -39,7 +39,7 @@ class DummyWorker():
             loop=loop,
             client_properties={
                 "client_properties": {
-                    "connection_name": "Dummy worker"
+                    "connection_name": "Dummy domain worker"
                 }
             }
         )
@@ -59,17 +59,11 @@ class DummyWorker():
                 async for message in queue_iter:
                     async with message.process():
                         message_body = json.loads(message.body)
-                        # self.__logger.info(f"Work item received: {json.dumps(message_body, sort_keys=True, indent=4)}")
-                        # self.__logger.info(f"{message.correlation_id}")
-
-                        translations = message_body["text"]
-                        for i in range(len(translations)):
-                            translations[i] = "    :D     " + translations[i] if translations[i] else translations[i]
+                        self.__logger.info(f"Work item received: {json.dumps(message_body, sort_keys=True, indent=4)}")
+                        self.__logger.info(f"{message.correlation_id}")
 
                         response = json.dumps({
-                            "status":"Im ok",
-                            "status_code":200,
-                            "translation": translations
+                            "domain":"general"
                         }).encode()
 
                         await channel.default_exchange.publish(
