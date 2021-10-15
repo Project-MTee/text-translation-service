@@ -8,10 +8,10 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Enums;
+using Tilde.MT.TranslationAPIService.Exceptions;
 using Tilde.MT.TranslationAPIService.Extensions;
-using Tilde.MT.TranslationAPIService.Models;
+using Tilde.MT.TranslationAPIService.Models.DTO.Translation;
 using Tilde.MT.TranslationAPIService.Models.Errors;
-using Tilde.MT.TranslationAPIService.Models.Translation;
 using Tilde.MT.TranslationAPIService.Services;
 
 namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
@@ -56,29 +56,22 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         [SwaggerResponse((int)HttpStatusCode.GatewayTimeout, Description = "Request timed out", Type=typeof(APIError))]
         [SwaggerResponse((int)HttpStatusCode.NotFound, Description = "Language direction is not found", Type = typeof(APIError))]
         [SwaggerResponse((int)HttpStatusCode.RequestEntityTooLarge, Description = "Maximum text size limit reached for the request", Type = typeof(APIError))]
-        public async Task<ActionResult<Translation>> GetTranslation(Models.Translation.RequestTranslation request)
+        public async Task<ActionResult<Translation>> GetTranslation(RequestTranslation request)
         {
-            var languageDirections = await _languageDirectionService.Read();
-
-            if (languageDirections == null)
+            try
             {
-                return FormatAPIError(HttpStatusCode.InternalServerError, ErrorSubCode.GatewayLanguageDirectionGeneric);
+                var valid = await _languageDirectionService.Validate(request);
+
+                if (!valid)
+                {
+                    return FormatAPIError(HttpStatusCode.NotFound, ErrorSubCode.GatewayLanguageDirectionNotFound);
+                }
             }
-
-            // check if language direction exists.
-            var languageDirectionInSettings = languageDirections.Where(item =>
+            catch(LanguageDirectionsException ex)
             {
-                var languageMatches = item.SourceLanguage == request.SourceLanguage &&
-                    item.TargetLanguage == request.TargetLanguage;
+                _logger.LogError(ex, "Exception loading language directions");
 
-                var domainMatches = string.IsNullOrEmpty(request.Domain) || item.Domain == request.Domain;
-
-                return domainMatches && languageMatches;
-            });
-
-            if (!languageDirectionInSettings.Any())
-            {
-                return FormatAPIError(HttpStatusCode.NotFound, ErrorSubCode.GatewayLanguageDirectionNotFound);
+                return FormatAPIError(HttpStatusCode.InternalServerError, ErrorSubCode.GatewayLanguageDirectionGeneric);
             }
 
             var translationMessage = _mapper.Map<Models.RabbitMQ.Translation.TranslationRequest>(request);

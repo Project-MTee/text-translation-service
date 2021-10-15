@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
-namespace Tilde.MT.TranslationAPIService.Models.LanguageDirections
+namespace Tilde.MT.TranslationAPIService.Models.DTO.LanguageDirections
 {
     public class GetLanguageDirections
     {

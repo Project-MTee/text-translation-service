@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Tilde.MT.TranslationAPIService.Models.Translation
+namespace Tilde.MT.TranslationAPIService.Models.DTO.Translation
 {
     public class Translation
     {

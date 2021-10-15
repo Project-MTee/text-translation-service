@@ -3,12 +3,16 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Tilde.MT.TranslationAPIService.Exceptions;
 using Tilde.MT.TranslationAPIService.Models;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
+using Tilde.MT.TranslationAPIService.Models.DTO.LanguageDirections;
+using Tilde.MT.TranslationAPIService.Models.DTO.Translation;
 
 namespace Tilde.MT.TranslationAPIService.Services
 {
@@ -34,13 +38,13 @@ namespace Tilde.MT.TranslationAPIService.Services
             _serviceConfiguration = serviceConfiguration.Value;
         }
 
-        public async Task<List<Models.LanguageDirections.LanguageDirection>> Read()
+        private async Task<List<LanguageDirection>> Read()
         {
             try
             {
                 await semaphore.WaitAsync();
 
-                if (_cache.Get<List<Models.LanguageDirections.LanguageDirection>>(MemoryCacheKeys.LanguageDirections) == null)
+                if (_cache.Get<List<LanguageDirection>>(MemoryCacheKeys.LanguageDirections) == null)
                 {
                     var client = _clientFactory.CreateClient();
 
@@ -50,7 +54,7 @@ namespace Tilde.MT.TranslationAPIService.Services
 
                     var jsonString = await response.Content.ReadAsStringAsync();
 
-                    var languageDirections = JsonSerializer.Deserialize<Models.LanguageDirections.GetLanguageDirections>(jsonString);
+                    var languageDirections = JsonSerializer.Deserialize<GetLanguageDirections>(jsonString);
 
                     _cache.Set(MemoryCacheKeys.LanguageDirections, languageDirections.LanguageDirections, TimeSpan.FromHours(1));
                 }
@@ -64,7 +68,30 @@ namespace Tilde.MT.TranslationAPIService.Services
                 semaphore.Release();
             }
 
-            return _cache.Get<List<Models.LanguageDirections.LanguageDirection>>(MemoryCacheKeys.LanguageDirections);
+            return _cache.Get<List<LanguageDirection>>(MemoryCacheKeys.LanguageDirections);
+        }
+    
+        public async Task<bool> Validate(RequestTranslation request)
+        {
+            var languageDirections = await Read();
+
+            if(languageDirections == null)
+            {
+                throw new LanguageDirectionsException("Failed to load language directions");
+            }
+
+            // check if language direction exists.
+            var languageDirectionInSettings = languageDirections.Where(item =>
+            {
+                var languageMatches = item.SourceLanguage == request.SourceLanguage &&
+                    item.TargetLanguage == request.TargetLanguage;
+
+                var domainMatches = string.IsNullOrEmpty(request.Domain) || item.Domain == request.Domain;
+
+                return domainMatches && languageMatches;
+            });
+
+            return languageDirectionInSettings.Any();
         }
     }
 }
