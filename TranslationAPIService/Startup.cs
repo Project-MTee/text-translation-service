@@ -260,8 +260,8 @@ namespace Tilde.MT.TranslationAPIService
             {
                 endpoints.MapControllers();
 
-                // Startup probe
-                endpoints.MapHealthChecks("/health/startup", new HealthCheckOptions()
+                // Startup probe / readyness probe
+                endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions()
                 {
                     // check if MassTransit can connect 
                     Predicate = (check) => {
@@ -269,7 +269,7 @@ namespace Tilde.MT.TranslationAPIService
                     }
                 });
 
-                // Liveness / readyness probe
+                // Liveness 
                 endpoints.MapHealthChecks("/health/live", new HealthCheckOptions()
                 {
 
