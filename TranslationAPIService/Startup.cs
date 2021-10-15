@@ -16,11 +16,12 @@ using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Tilde.MT.TranslationAPIService.Models;
 using System.Text.Json;
 using Serilog;
 using System.Linq;
 using Tilde.MT.TranslationAPIService.Extensions;
+using Tilde.MT.TranslationAPIService.Models.Errors;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 namespace Tilde.MT.TranslationAPIService
 {
@@ -258,6 +259,21 @@ namespace Tilde.MT.TranslationAPIService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+
+                // Startup probe
+                endpoints.MapHealthChecks("/health/startup", new HealthCheckOptions()
+                {
+                    // check if MassTransit can connect 
+                    Predicate = (check) => {
+                        return check.Tags.Contains("ready");
+                    }
+                });
+
+                // Liveness / readyness probe
+                endpoints.MapHealthChecks("/health/live", new HealthCheckOptions()
+                {
+
+                });
             });
         }
     }

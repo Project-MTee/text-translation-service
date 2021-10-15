@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Tilde.MT.TranslationAPIService.Models
+namespace Tilde.MT.TranslationAPIService.Models.Errors
 {
     public class APIError
     {

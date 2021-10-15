@@ -14,16 +14,13 @@ namespace Tilde.MT.TranslationAPIService.Services
     {
         private readonly ConfigurationSettings _configurationSettings;
         private readonly IRequestClient<DomainDetectionRequest> _requestClient;
-        private readonly ILogger _logger;
 
         public DomainDetectionService(
             IOptions<ConfigurationSettings> configurationSettings,
-            ILogger<DomainDetectionService> logger,
             IRequestClient<DomainDetectionRequest> requestClient
         )
         {
             _configurationSettings = configurationSettings.Value;
-            _logger = logger;
             _requestClient = requestClient;
         }
 

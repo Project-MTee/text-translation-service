@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Enums;
 using Tilde.MT.TranslationAPIService.Extensions;
 using Tilde.MT.TranslationAPIService.Models;
+using Tilde.MT.TranslationAPIService.Models.Errors;
 using Tilde.MT.TranslationAPIService.Models.Translation;
 using Tilde.MT.TranslationAPIService.Services;
 
