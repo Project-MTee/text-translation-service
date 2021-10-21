@@ -7,6 +7,7 @@
     <AssemblyName>Tilde.MT.TranslationAPIService</AssemblyName>
     <RootNamespace>Tilde.MT.TranslationAPIService</RootNamespace>
     <DocumentationFile>Tilde.MT.TranslationAPIService.xml</DocumentationFile>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
