@@ -5,7 +5,7 @@ namespace Tilde.MT.TranslationAPIService.Models.DTO.LanguageDirections
     public class LanguageDirection
     {
         /// <summary>
-        /// The language of the source text. Two-byte languge code accordding to ISO 639-1.
+        /// The language of the source text. Two-byte languge code according to ISO 639-1.
         /// </summary>
         /// <example>en</example>
         [JsonPropertyName("srcLang")]
