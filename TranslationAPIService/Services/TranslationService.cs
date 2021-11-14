@@ -24,6 +24,12 @@ namespace Tilde.MT.TranslationAPIService.Services
             _requestClient = requestClient;
         }
 
+        /// <summary>
+        /// Translate text using MT worker 
+        /// </summary>
+        /// <param name="translationRequest"></param>
+        /// <exception cref="RequestTimeoutException">Message is not being received in configured timeout period via RabbitMQ</exception>
+        /// <returns></returns>
         public async Task<TranslationResponse> Translate(TranslationRequest translationRequest)
         {
             using var request = _requestClient.Create(translationRequest, timeout: _configurationSettings.TranslationTimeout);

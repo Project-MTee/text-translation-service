@@ -24,6 +24,12 @@ namespace Tilde.MT.TranslationAPIService.Services
             _requestClient = requestClient;
         }
 
+        /// <summary>
+        /// Detect domain using domain detection worker
+        /// </summary>
+        /// <param name="detectionRequest"></param>
+        /// <exception cref="RequestTimeoutException">Message is not being received in configured timeout period via RabbitMQ</exception>
+        /// <returns></returns>
         public async Task<DomainDetectionResponse> Detect(DomainDetectionRequest detectionRequest)
         {
             using var request = _requestClient.Create(detectionRequest, timeout: _configurationSettings.DomainDetectionTimeout);
