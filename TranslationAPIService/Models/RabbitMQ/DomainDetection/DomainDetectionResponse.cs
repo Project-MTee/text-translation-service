@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ.DomainDetection
 {
-    public class DomainDetectionResponse: RabbitMQGenericMessage
+    public class DomainDetectionResponse: RabbitMQGenericResponse
     {
         /// <summary>
         /// detected domain

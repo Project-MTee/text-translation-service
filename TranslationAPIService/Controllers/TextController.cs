@@ -56,7 +56,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         [SwaggerResponse((int)HttpStatusCode.GatewayTimeout, Description = "Request timed out", Type=typeof(APIError))]
         [SwaggerResponse((int)HttpStatusCode.NotFound, Description = "Language direction is not found", Type = typeof(APIError))]
         [SwaggerResponse((int)HttpStatusCode.RequestEntityTooLarge, Description = "Maximum text size limit reached for the request", Type = typeof(APIError))]
-        public async Task<ActionResult<Translation>> GetTranslation(RequestTranslation request)
+        public async Task<ActionResult<Translation>> GetTranslation(TranslationRequest request)
         {
             try
             {

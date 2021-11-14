@@ -7,7 +7,7 @@
     <AssemblyName>Tilde.MT.TranslationAPIService</AssemblyName>
     <RootNamespace>Tilde.MT.TranslationAPIService</RootNamespace>
     <DocumentationFile></DocumentationFile>
-    <Version>1.2.2</Version>
+    <Version>1.2.3</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 

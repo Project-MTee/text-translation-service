@@ -23,7 +23,7 @@ namespace Tilde.MT.TranslationAPIService.Services
         private readonly IHttpClientFactory _clientFactory;
         private readonly ConfigurationServices _serviceConfiguration;
 
-        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim semaphore = new(1, 1);
         
         public LanguageDirectionService(
             ILogger<LanguageDirectionService> logger,
@@ -77,7 +77,7 @@ namespace Tilde.MT.TranslationAPIService.Services
         /// <param name="request"></param>
         /// <returns></returns>
         /// <exception cref="LanguageDirectionsException">Failed to load language directions</exception>
-        public async Task<bool> Validate(RequestTranslation request)
+        public async Task<bool> Validate(TranslationRequest request)
         {
             var languageDirections = await Read();
 

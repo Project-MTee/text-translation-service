@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation
 {
-    public class TranslationResponse: RabbitMQGenericMessage
+    public class TranslationResponse: RabbitMQGenericResponse
     {
         /// <summary>
         /// Translation result

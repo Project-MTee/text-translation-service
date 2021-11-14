@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tilde.MT.TranslationAPIService.Models.DTO.Translation
 {
-    public class RequestTranslation
+    public class TranslationRequest
     {
         /// <summary>
         /// The language of the source text. Two-byte language code according to ISO 639-1.

@@ -2,7 +2,7 @@
 
 namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ
 {
-    public class RabbitMQGenericMessage
+    public class RabbitMQGenericResponse
     {
         /// <summary>
         /// HTTP status code (integer), 200 by default
