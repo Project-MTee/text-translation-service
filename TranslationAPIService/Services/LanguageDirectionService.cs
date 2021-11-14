@@ -54,7 +54,7 @@ namespace Tilde.MT.TranslationAPIService.Services
 
                     var jsonString = await response.Content.ReadAsStringAsync();
 
-                    var languageDirections = JsonSerializer.Deserialize<GetLanguageDirections>(jsonString);
+                    var languageDirections = JsonSerializer.Deserialize<LanguageDirectionsResponse>(jsonString);
 
                     _cache.Set(MemoryCacheKeys.LanguageDirections, languageDirections.LanguageDirections, TimeSpan.FromHours(1));
                 }

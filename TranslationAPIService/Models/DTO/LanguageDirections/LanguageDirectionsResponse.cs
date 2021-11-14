@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Tilde.MT.TranslationAPIService.Models.DTO.LanguageDirections
 {
-    public class GetLanguageDirections
+    public class LanguageDirectionsResponse
     {
         [JsonPropertyName("languageDirections")]
         public IEnumerable<LanguageDirection> LanguageDirections { get; set; }
