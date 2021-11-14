@@ -3,32 +3,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
+using Tilde.MT.TranslationAPIService.Models.Configuration;
 
 namespace Tilde.MT.TranslationAPIService
 {
     public class Program
     {
         public static void Main(string[] args)
-        {
-            ConfigureSerilog();
-            CreateHostBuilder(args).Build().Run();
-        }
-
-        public static IHostBuilder CreateHostBuilder(string[] args)
-        {
-            return Host.CreateDefaultBuilder(args)
-                .UseSerilog()
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                    webBuilder.UseKestrel(options =>
-                    {
-                        options.Limits.MaxRequestBodySize = 20480; // 20KB
-                    });
-                });
-        }
-
-        private static void ConfigureSerilog()
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -38,6 +19,28 @@ namespace Tilde.MT.TranslationAPIService
                 .AddEnvironmentVariables()
                 .Build();
 
+            ConfigureSerilog(configuration);
+            CreateHostBuilder(args, configuration).Build().Run();
+        }
+
+        public static IHostBuilder CreateHostBuilder(string[] args, IConfiguration configuration)
+        {
+            var configurationSettings = configuration.GetSection("Configuration").Get<ConfigurationSettings>();
+            
+            return Host.CreateDefaultBuilder(args)
+                .UseSerilog()
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseKestrel(options =>
+                    {
+                        options.Limits.MaxRequestBodySize = configurationSettings.RequestSizeLimit;
+                    });
+                });
+        }
+
+        private static void ConfigureSerilog(IConfiguration configuration)
+        {
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .WriteTo.Debug()

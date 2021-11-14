@@ -9,5 +9,10 @@ namespace Tilde.MT.TranslationAPIService.Models.Configuration
     {
         public TimeSpan TranslationTimeout { get; set; }
         public TimeSpan DomainDetectionTimeout { get; set; }
+        /// <summary>
+        /// Request size limit in bytes.
+        /// For example: 20480 -> 20KB
+        /// </summary>
+        public long RequestSizeLimit { get; set; }
     }
 }
