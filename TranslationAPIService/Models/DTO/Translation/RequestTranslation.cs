@@ -10,7 +10,7 @@ namespace Tilde.MT.TranslationAPIService.Models.DTO.Translation
     public class RequestTranslation
     {
         /// <summary>
-        /// The language of the source text. Two-byte languge code according to ISO 639-1.
+        /// The language of the source text. Two-byte language code according to ISO 639-1.
         /// </summary>
         /// <example>en</example>
         [Required]
@@ -19,7 +19,7 @@ namespace Tilde.MT.TranslationAPIService.Models.DTO.Translation
         public string SourceLanguage { get; set; }
 
         /// <summary>
-        /// The language to translate text to. Two-byte languge code according to ISO 639-1.
+        /// The language to translate text to. Two-byte language code according to ISO 639-1.
         /// </summary>
         /// <example>et</example>
         [Required]
