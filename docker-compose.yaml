@@ -45,7 +45,7 @@ services:
       RABBITMQ_USER: $Services__RabbitMQ__UserName
       RABBITMQ_PASS: $Services__RabbitMQ__Password
 
-  dummy_worker_translation_en_et:
+  dummy_worker_translation_en_et_plain:
     build:
       context: ./DummyWorker/translation
       dockerfile: ./Dockerfile
@@ -57,7 +57,7 @@ services:
       RABBITMQ_USER: $Services__RabbitMQ__UserName
       RABBITMQ_PASS: $Services__RabbitMQ__Password
 
-  dummy_worker_translation_en_et:
+  dummy_worker_translation_en_et_doc:
     build:
       context: ./DummyWorker/translation
       dockerfile: ./Dockerfile
@@ -70,7 +70,7 @@ services:
       RABBITMQ_PASS: $Services__RabbitMQ__Password
 
 
-  dummy_worker_translation_et_en:
+  dummy_worker_translation_et_en_plain:
     build:
       context: ./DummyWorker/translation
       dockerfile: ./Dockerfile
@@ -82,7 +82,7 @@ services:
       RABBITMQ_USER: $Services__RabbitMQ__UserName
       RABBITMQ_PASS: $Services__RabbitMQ__Password
 
-  dummy_worker_translation_et_en:
+  dummy_worker_translation_et_en_doc:
     build:
       context: ./DummyWorker/translation
       dockerfile: ./Dockerfile

@@ -50,8 +50,7 @@ namespace Tilde.MT.TranslationAPIService
                                       builder.WithOrigins("http://localhost:4200").AllowAnyHeader();
                                   });
             });
-            var serviceConfiguration = Configuration.GetSection("Services").Get<ConfigurationServices>();
-            var configurationSettings = Configuration.GetSection("Configuration").Get<ConfigurationSettings>();
+            
             services.Configure<ConfigurationServices>(Configuration.GetSection("Services"));
             services.Configure<ConfigurationSettings>(Configuration.GetSection("Configuration"));
 
@@ -78,6 +77,8 @@ namespace Tilde.MT.TranslationAPIService
 
                 x.UsingRabbitMq((context, config) =>
                 {
+                    var serviceConfiguration = Configuration.GetSection("Services").Get<ConfigurationServices>();
+
                     config.Host(serviceConfiguration.RabbitMQ.Host, "/", host =>
                     {
                         host.Username(serviceConfiguration.RabbitMQ.UserName);
@@ -200,8 +201,8 @@ namespace Tilde.MT.TranslationAPIService
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 #if DEBUG
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TranslationAPI v1"));
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TranslationAPI v1"));
 #endif
 
             // Catch all unexpected errors
