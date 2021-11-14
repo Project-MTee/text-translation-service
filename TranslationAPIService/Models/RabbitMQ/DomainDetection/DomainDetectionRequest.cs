@@ -10,7 +10,7 @@ namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ.DomainDetection
     public class DomainDetectionRequest
     {
         /// <summary>
-        /// input text. Can be a string (may contain multiple sentences or paragraphs) or a list of strings (may not contain more than one segment)
+        /// Text to detect domain for
         /// </summary>
         [JsonProperty("text")]
         public List<string> Text { get; set; }

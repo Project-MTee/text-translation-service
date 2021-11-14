@@ -10,7 +10,7 @@ namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ.DomainDetection
     public class DomainDetectionResponse: RabbitMQGenericMessage
     {
         /// <summary>
-        /// string of the detected domain name
+        /// detected domain
         /// </summary>
         [JsonProperty("domain")]
         public string Domain { get; set; }
