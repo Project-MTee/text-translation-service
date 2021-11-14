@@ -70,7 +70,13 @@ namespace Tilde.MT.TranslationAPIService.Services
 
             return _cache.Get<List<LanguageDirection>>(MemoryCacheKeys.LanguageDirections);
         }
-    
+
+        /// <summary>
+        /// Check if language direction is available
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <exception cref="LanguageDirectionsException">Failed to load language directions</exception>
         public async Task<bool> Validate(RequestTranslation request)
         {
             var languageDirections = await Read();
