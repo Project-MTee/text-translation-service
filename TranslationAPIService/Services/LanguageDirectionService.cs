@@ -44,7 +44,7 @@ namespace Tilde.MT.TranslationAPIService.Services
             {
                 await semaphore.WaitAsync();
 
-                if (_cache.Get<List<LanguageDirection>>(MemoryCacheKeys.LanguageDirections) == null)
+                if (_cache.Get<IEnumerable<LanguageDirection>>(MemoryCacheKeys.LanguageDirections) == null)
                 {
                     var client = _clientFactory.CreateClient();
 
