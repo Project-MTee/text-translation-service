@@ -38,7 +38,7 @@ namespace Tilde.MT.TranslationAPIService.Services
             _serviceConfiguration = serviceConfiguration.Value;
         }
 
-        private async Task<List<LanguageDirection>> Read()
+        private async Task<IEnumerable<LanguageDirection>> Read()
         {
             try
             {
@@ -68,7 +68,7 @@ namespace Tilde.MT.TranslationAPIService.Services
                 semaphore.Release();
             }
 
-            return _cache.Get<List<LanguageDirection>>(MemoryCacheKeys.LanguageDirections);
+            return _cache.Get<IEnumerable<LanguageDirection>>(MemoryCacheKeys.LanguageDirections);
         }
 
         /// <summary>
