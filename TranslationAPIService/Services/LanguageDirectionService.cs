@@ -24,6 +24,8 @@ namespace Tilde.MT.TranslationAPIService.Services
         private readonly ConfigurationServices _serviceConfiguration;
 
         private readonly SemaphoreSlim semaphore = new(1, 1);
+
+        private readonly TimeSpan expiration = TimeSpan.FromHours(1);
         
         public LanguageDirectionService(
             ILogger<LanguageDirectionService> logger,
@@ -44,31 +46,35 @@ namespace Tilde.MT.TranslationAPIService.Services
             {
                 await semaphore.WaitAsync();
 
-                if (_cache.Get<IEnumerable<LanguageDirection>>(MemoryCacheKeys.LanguageDirections) == null)
+
+                var languageDirections = await _cache.GetOrCreateAsync(MemoryCacheKeys.LanguageDirections, async (cacheEntry) =>
                 {
                     var client = _clientFactory.CreateClient();
 
-                    var response = await client.GetAsync($"{_serviceConfiguration.TranslationSystem.Url.TrimEnd(new char[] { '/' , '\\', ' '})}/LanguageDirection");
-                    
+                    var response = await client.GetAsync($"{_serviceConfiguration.TranslationSystem.Url.TrimEnd(new char[] { '/', '\\', ' ' })}/LanguageDirection");
+
                     response.EnsureSuccessStatusCode();
 
                     var jsonString = await response.Content.ReadAsStringAsync();
 
                     var languageDirections = JsonSerializer.Deserialize<LanguageDirectionsResponse>(jsonString);
 
-                    _cache.Set(MemoryCacheKeys.LanguageDirections, languageDirections.LanguageDirections, TimeSpan.FromHours(1));
-                }
+                    cacheEntry.SetAbsoluteExpiration(expiration);
+
+                    return languageDirections.LanguageDirections;
+                });
+
+                return languageDirections;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to update language directions");
+                throw new LanguageDirectionsException("Failed to load language directions");
             }
             finally
             {
                 semaphore.Release();
             }
-
-            return _cache.Get<IEnumerable<LanguageDirection>>(MemoryCacheKeys.LanguageDirections);
         }
 
         /// <summary>
@@ -80,11 +86,6 @@ namespace Tilde.MT.TranslationAPIService.Services
         public async Task<bool> Validate(TranslationRequest request)
         {
             var languageDirections = await Read();
-
-            if(languageDirections == null)
-            {
-                throw new LanguageDirectionsException("Failed to load language directions");
-            }
 
             // check if language direction exists.
             var valid = languageDirections.Any(item =>
