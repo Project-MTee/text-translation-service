@@ -87,7 +87,7 @@ namespace Tilde.MT.TranslationAPIService.Services
             }
 
             // check if language direction exists.
-            var languageDirectionInSettings = languageDirections.Where(item =>
+            var valid = languageDirections.Any(item =>
             {
                 var languageMatches = item.SourceLanguage == request.SourceLanguage &&
                     item.TargetLanguage == request.TargetLanguage;
@@ -97,7 +97,7 @@ namespace Tilde.MT.TranslationAPIService.Services
                 return domainMatches && languageMatches;
             });
 
-            return languageDirectionInSettings.Any();
+            return valid;
         }
     }
 }
