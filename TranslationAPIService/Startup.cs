@@ -4,9 +4,6 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
-using System;
-using System.IO;
 using Tilde.MT.TranslationAPIService.Extensions;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
 using Tilde.MT.TranslationAPIService.Models.Mappings;
@@ -23,35 +20,20 @@ namespace Tilde.MT.TranslationAPIService
 
         public IConfiguration Configuration { get; }
 
-        readonly string DevelopmentCorsPolicy = "development-policy";
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHttpClient();
             services.AddMemoryCache();
 
-            services.AddCors(options =>
-            {
-                options.AddPolicy(
-                    name: DevelopmentCorsPolicy,
-                    builder =>
-                    {
-                        builder.WithOrigins("http://localhost:4200").AllowAnyHeader();
-                    }
-                );
-            });
+            services.AddCorsPolicies();
 
             services.Configure<ConfigurationServices>(Configuration.GetSection("Services"));
             services.Configure<ConfigurationSettings>(Configuration.GetSection("Configuration"));
 
             services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "TranslationAPI", Version = "v1" });
-                c.EnableAnnotations();
-                c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{nameof(Tilde)}.{nameof(Tilde.MT)}.{nameof(Tilde.MT.TranslationAPIService)}.xml"));
-            });
+
+            services.AddDocumentation();
 
             var mappingConfig = new MapperConfiguration(config =>
             {
@@ -72,8 +54,7 @@ namespace Tilde.MT.TranslationAPIService
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 #if DEBUG
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TranslationAPI v1"));
+            app.UseDocumentation();
 #endif
 
             app.UseUnhandledExceptionProcessing();
@@ -84,7 +65,7 @@ namespace Tilde.MT.TranslationAPIService
 
             app.UseAuthorization();
 #if DEBUG
-            app.UseCors(DevelopmentCorsPolicy);
+            app.UseCorsPolicies();
 #endif
             app.UseEndpoints(endpoints =>
             {
