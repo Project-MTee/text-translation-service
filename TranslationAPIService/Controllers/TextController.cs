@@ -76,43 +76,30 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                 return FormatAPIError(HttpStatusCode.InternalServerError, ErrorSubCode.GatewayLanguageDirectionGeneric);
             }
 
-            var translationMessage = _mapper.Map<Models.DTO.Translation.TranslationServiceRequest>(request);
+            var detectedDomain = request.Domain;
 
             if (string.IsNullOrEmpty(request.Domain))
             {
                 try
                 {
                     _logger.LogDebug("Request domain detection, domain not provided");
-                    var detectedDomain = await _domainDetectionService.Detect(request.SourceLanguage, request.Text);
-
-                    translationMessage.Domain = detectedDomain;
+                    detectedDomain = await _domainDetectionService.Detect(request.SourceLanguage, request.Text);
                 }
                 catch (RequestTimeoutException)
                 {
                     _logger.LogWarning("Domain detection timed out");
 
-                    translationMessage.Domain = "general";
-
-                    /*return FormatTranslationError(
-                        HttpStatusCode.GatewayTimeout,
-                        ErrorSubCode.GatewayDomainDetectionTimedOut,
-                        "Domain detection timed out"
-                    );*/
+                    /*return FormatTranslationError(HttpStatusCode.GatewayTimeout, ErrorSubCode.GatewayDomainDetectionTimedOut);*/
                 }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Domain detection failed");
 
-                    translationMessage.Domain = "general";
-
-                    /*
-                    return FormatTranslationError(
-                        HttpStatusCode.InternalServerError,
-                        ErrorSubCode.GatewayDomainDetectionGeneric,
-                        "Domain detection failed due to unkown reason"
-                    );*/
+                    /*return FormatTranslationError(HttpStatusCode.InternalServerError, ErrorSubCode.GatewayDomainDetectionGeneric);*/
                 }
             }
+
+            var translationMessage = _mapper.Map<Models.DTO.Translation.TranslationServiceRequest>(request) with { Domain = detectedDomain };
 
             try
             {

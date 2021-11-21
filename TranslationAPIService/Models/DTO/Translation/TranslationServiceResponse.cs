@@ -1,10 +1,10 @@
 ﻿namespace Tilde.MT.TranslationAPIService.Models.DTO.Translation
 {
-    public class TranslationServiceResponse
+    public record TranslationServiceResponse
     {
         /// <summary>
         /// Translation result
         /// </summary>
-        public string[] Translations { get; set; }
+        public string[] Translations { get; init; }
     }
 }

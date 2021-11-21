@@ -2,12 +2,12 @@
 
 namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation
 {
-    public class TranslationResponse : RabbitMQGenericResponse
+    public record TranslationResponse : RabbitMQGenericResponse
     {
         /// <summary>
         /// Translation result
         /// </summary>
         [JsonProperty("translation")]
-        public string[] Translations { get; set; }
+        public string[] Translations { get; init; }
     }
 }

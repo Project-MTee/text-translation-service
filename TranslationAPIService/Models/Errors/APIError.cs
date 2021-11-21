@@ -2,9 +2,9 @@
 
 namespace Tilde.MT.TranslationAPIService.Models.Errors
 {
-    public class APIError
+    public record APIError
     {
         [JsonPropertyName("error")]
-        public Error Error { get; set; }
+        public Error Error { get; init; }
     }
 }

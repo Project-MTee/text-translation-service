@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Tilde.MT.TranslationAPIService.Models.Configuration
 {
-    public class ConfigurationSettings
+    public record ConfigurationSettings
     {
-        public TimeSpan TranslationTimeout { get; set; }
-        public TimeSpan DomainDetectionTimeout { get; set; }
+        public TimeSpan TranslationTimeout { get; init; }
+        public TimeSpan DomainDetectionTimeout { get; init; }
         /// <summary>
         /// Request size limit in bytes.
         /// For example: 20480 -> 20KB
         /// </summary>
-        public long RequestSizeLimit { get; set; }
+        public long RequestSizeLimit { get; init; }
     }
 }

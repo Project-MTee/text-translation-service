@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Tilde.MT.TranslationAPIService.Models.Configuration
+﻿namespace Tilde.MT.TranslationAPIService.Models.Configuration
 {
-    public class ConfigurationServices
+    public record ConfigurationServices
     {
-        public Services.RabbitMQ RabbitMQ { get; set; }
-        public Services.TranslationSystem TranslationSystem { get; set; }
+        public Services.RabbitMQ RabbitMQ { get; init; }
+        public Services.TranslationSystem TranslationSystem { get; init; }
     }
 }
