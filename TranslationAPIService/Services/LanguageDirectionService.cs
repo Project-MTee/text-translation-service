@@ -8,11 +8,10 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Tilde.MT.TranslationAPIService.Exceptions;
+using Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection;
 using Tilde.MT.TranslationAPIService.Models;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
 using Tilde.MT.TranslationAPIService.Models.DTO.LanguageDirections;
-using Tilde.MT.TranslationAPIService.Models.DTO.Translation;
 
 namespace Tilde.MT.TranslationAPIService.Services
 {
@@ -26,7 +25,7 @@ namespace Tilde.MT.TranslationAPIService.Services
         private readonly SemaphoreSlim semaphore = new(1, 1);
 
         private readonly TimeSpan expiration = TimeSpan.FromHours(1);
-        
+
         public LanguageDirectionService(
             ILogger<LanguageDirectionService> logger,
             IMemoryCache memoryCache,
@@ -40,6 +39,11 @@ namespace Tilde.MT.TranslationAPIService.Services
             _serviceConfiguration = serviceConfiguration.Value;
         }
 
+        /// <summary>
+        /// Fetch language directions from external language direction service or get them from cache
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="LanguageDirectionReadException">Failed to load language directions</exception>
         private async Task<IEnumerable<LanguageDirection>> Read()
         {
             try
@@ -69,7 +73,7 @@ namespace Tilde.MT.TranslationAPIService.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to update language directions");
-                throw new LanguageDirectionsException("Failed to load language directions");
+                throw new LanguageDirectionReadException();
             }
             finally
             {
@@ -80,25 +84,31 @@ namespace Tilde.MT.TranslationAPIService.Services
         /// <summary>
         /// Check if language direction is available
         /// </summary>
-        /// <param name="request"></param>
+        /// <param name="domain"></param>
+        /// <param name="sourceLanguage"></param>
+        /// <param name="targetLanguage"></param>
         /// <returns></returns>
-        /// <exception cref="LanguageDirectionsException">Failed to load language directions</exception>
-        public async Task<bool> Validate(TranslationRequest request)
+        /// <exception cref="LanguageDirectionReadException">Failed to load language directions</exception>
+        /// <exception cref="LanguageDirectionNotFoundException">Language direction not found</exception>
+        public async Task Validate(string domain, string sourceLanguage, string targetLanguage)
         {
             var languageDirections = await Read();
 
             // check if language direction exists.
             var valid = languageDirections.Any(item =>
             {
-                var languageMatches = item.SourceLanguage == request.SourceLanguage &&
-                    item.TargetLanguage == request.TargetLanguage;
+                var languageMatches = item.SourceLanguage == sourceLanguage &&
+                    item.TargetLanguage == targetLanguage;
 
-                var domainMatches = string.IsNullOrEmpty(request.Domain) || item.Domain == request.Domain;
+                var domainMatches = string.IsNullOrEmpty(domain) || item.Domain == domain;
 
                 return domainMatches && languageMatches;
             });
 
-            return valid;
+            if (!valid)
+            {
+                throw new LanguageDirectionNotFoundException(domain, sourceLanguage, targetLanguage);
+            }
         }
     }
 }

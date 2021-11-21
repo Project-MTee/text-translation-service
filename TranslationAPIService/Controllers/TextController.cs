@@ -7,9 +7,10 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Tilde.MT.TranslationAPIService.Controllers;
 using Tilde.MT.TranslationAPIService.Enums;
-using Tilde.MT.TranslationAPIService.Exceptions;
-using Tilde.MT.TranslationAPIService.Extensions;
+using Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection;
+using Tilde.MT.TranslationAPIService.Exceptions.Translation;
 using Tilde.MT.TranslationAPIService.Models.DTO.Translation;
 using Tilde.MT.TranslationAPIService.Models.Errors;
 using Tilde.MT.TranslationAPIService.Services;
@@ -21,7 +22,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
     /// </summary>
     [ApiController]
     [Route("[controller]")]
-    public class TextController : ControllerBase
+    public class TextController : BaseController
     {
         private readonly ILogger<TextController> _logger;
         private readonly IMapper _mapper;
@@ -30,7 +31,7 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         private readonly LanguageDirectionService _languageDirectionService;
 
         public TextController(
-            ILogger<TextController> logger, 
+            ILogger<TextController> logger,
             IMapper mapper,
             TranslationService translationService,
             DomainDetectionService domainDetectionService,
@@ -51,43 +52,40 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(Translation))]
-        [SwaggerResponse((int)HttpStatusCode.BadRequest, Description = "Missing or incorrect parameters", Type =typeof(APIError))]
-        [SwaggerResponse((int)HttpStatusCode.InternalServerError, Description = "An unexpected error occured", Type=typeof(APIError))]
-        [SwaggerResponse((int)HttpStatusCode.GatewayTimeout, Description = "Request timed out", Type=typeof(APIError))]
+        [SwaggerResponse((int)HttpStatusCode.BadRequest, Description = "Missing or incorrect parameters", Type = typeof(APIError))]
+        [SwaggerResponse((int)HttpStatusCode.InternalServerError, Description = "An unexpected error occured", Type = typeof(APIError))]
+        [SwaggerResponse((int)HttpStatusCode.GatewayTimeout, Description = "Request timed out", Type = typeof(APIError))]
         [SwaggerResponse((int)HttpStatusCode.NotFound, Description = "Language direction is not found", Type = typeof(APIError))]
         [SwaggerResponse((int)HttpStatusCode.RequestEntityTooLarge, Description = "Maximum text size limit reached for the request", Type = typeof(APIError))]
         public async Task<ActionResult<Translation>> GetTranslation(TranslationRequest request)
         {
             try
             {
-                var valid = await _languageDirectionService.Validate(request);
-
-                if (!valid)
-                {
-                    return FormatAPIError(HttpStatusCode.NotFound, ErrorSubCode.GatewayLanguageDirectionNotFound);
-                }
+                await _languageDirectionService.Validate(request.Domain, request.SourceLanguage, request.TargetLanguage);
             }
-            catch(LanguageDirectionsException ex)
+            catch (LanguageDirectionNotFoundException ex)
+            {
+                _logger.LogError(ex, "Language direction not found");
+
+                return FormatAPIError(HttpStatusCode.NotFound, ErrorSubCode.GatewayLanguageDirectionNotFound);
+            }
+            catch (LanguageDirectionReadException ex)
             {
                 _logger.LogError(ex, "Exception loading language directions");
 
                 return FormatAPIError(HttpStatusCode.InternalServerError, ErrorSubCode.GatewayLanguageDirectionGeneric);
             }
 
-            var translationMessage = _mapper.Map<Models.RabbitMQ.Translation.TranslationRequest>(request);
+            var translationMessage = _mapper.Map<Models.DTO.Translation.TranslationServiceRequest>(request);
 
             if (string.IsNullOrEmpty(request.Domain))
             {
                 try
                 {
                     _logger.LogDebug("Request domain detection, domain not provided");
-                    var detectedDomain = await _domainDetectionService.Detect(new Models.RabbitMQ.DomainDetection.DomainDetectionRequest()
-                    {
-                        SourceLanguage = request.SourceLanguage,
-                        Text = request.Text
-                    });
+                    var detectedDomain = await _domainDetectionService.Detect(request.SourceLanguage, request.Text);
 
-                    translationMessage.Domain = detectedDomain.Domain;
+                    translationMessage.Domain = detectedDomain;
                 }
                 catch (RequestTimeoutException)
                 {
@@ -120,33 +118,30 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
             {
                 var response = await _translationService.Translate(translationMessage);
 
-                if ((HttpStatusCode)response.StatusCode != HttpStatusCode.OK)
+                var translationResponse = new Translation()
                 {
-                    _logger.LogError($"Translation failed, worker error code: {response.StatusCode}, error status: {response.Status}");
-
-                    return FormatAPIError(
-                        HttpStatusCode.InternalServerError,
-                        ErrorSubCode.WorkerTranslationGeneric,
-                        message: response.Status,
-                        messageStatusCode: (HttpStatusCode)response.StatusCode
-                    );
-                }
-                else
-                {
-                    var translationResponse = new Translation()
+                    Domain = translationMessage.Domain,
+                    Translations = response.Translations.Select(item => new TranslationItem()
                     {
-                        Domain = translationMessage.Domain,
-                        Translations = response.Translations.Select(item => new TranslationItem()
-                        {
-                            Translation = item
-                        }).ToList()
-                    };
-                    return Ok(translationResponse);
-                }
+                        Translation = item
+                    }).ToList()
+                };
+                return Ok(translationResponse);
             }
-            catch (RequestTimeoutException)
+            catch (TranslationWorkerException ex)
             {
-                _logger.LogError("Translation timed out");
+                _logger.LogError($"Translation failed");
+
+                return FormatAPIError(
+                    HttpStatusCode.InternalServerError,
+                    ErrorSubCode.WorkerTranslationGeneric,
+                    message: ex.StatusMessage,
+                    messageStatusCode: (HttpStatusCode)ex.StatusCode
+                );
+            }
+            catch (TranslationTimeoutException ex)
+            {
+                _logger.LogError(ex, "Translation timed out");
 
                 return FormatAPIError(HttpStatusCode.GatewayTimeout, ErrorSubCode.GatewayTranslationTimedOut);
             }
@@ -156,21 +151,6 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
 
                 return FormatAPIError(HttpStatusCode.InternalServerError, ErrorSubCode.GatewayTranslationGeneric);
             }
-        }
-
-        private ActionResult<Translation> FormatAPIError(HttpStatusCode status, ErrorSubCode subcode, HttpStatusCode? messageStatusCode = null, string message = null)
-        {
-            return StatusCode(
-                (int)status,
-                new APIError()
-                {
-                    Error = new Error()
-                    {
-                        Code = (int)(messageStatusCode ?? status) * 1000 + (int)subcode,
-                        Message = message ?? subcode.Description()
-                    }
-                }
-            );
         }
     }
 }

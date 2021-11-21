@@ -1,11 +1,12 @@
-﻿using GreenPipes;
+﻿using AutoMapper;
+using GreenPipes;
 using MassTransit;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
 using System.Threading.Tasks;
+using Tilde.MT.TranslationAPIService.Exceptions.Translation;
 using Tilde.MT.TranslationAPIService.Extensions.MassTransit;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
+using Tilde.MT.TranslationAPIService.Models.DTO.Translation;
 using Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation;
 
 namespace Tilde.MT.TranslationAPIService.Services
@@ -13,30 +14,49 @@ namespace Tilde.MT.TranslationAPIService.Services
     public class TranslationService
     {
         private readonly ConfigurationSettings _configurationSettings;
-        private readonly IRequestClient<TranslationRequest> _requestClient;
+        private readonly IRequestClient<Models.RabbitMQ.Translation.TranslationRequest> _requestClient;
+        private readonly IMapper _mapper;
 
         public TranslationService(
+            IMapper mapper,
             IOptions<ConfigurationSettings> configurationSettings,
-            IRequestClient<TranslationRequest> requestClient
+            IRequestClient<Models.RabbitMQ.Translation.TranslationRequest> requestClient
         )
         {
             _configurationSettings = configurationSettings.Value;
             _requestClient = requestClient;
+            _mapper = mapper;
         }
 
         /// <summary>
         /// Translate text using MT worker 
         /// </summary>
         /// <param name="translationRequest"></param>
-        /// <exception cref="RequestTimeoutException">Message is not being received in configured timeout period via RabbitMQ</exception>
+        /// <exception cref="TranslationTimeoutException">Message is not being received in configured timeout period via RabbitMQ</exception>
+        /// <exception cref="TranslationWorkerException">Translation worker returned error response</exception>
         /// <returns></returns>
-        public async Task<TranslationResponse> Translate(TranslationRequest translationRequest)
+        public async Task<TranslationServiceResponse> Translate(TranslationServiceRequest translationRequest)
         {
-            using var request = _requestClient.Create(translationRequest, timeout: _configurationSettings.TranslationTimeout);
-            request.UseExecute(x => x.AddRequestHeaders<TranslationResponse>());
-            var translationResponse = await request.GetResponse<TranslationResponse>();
+            try
+            {
+                using var request = _requestClient.Create(translationRequest, timeout: _configurationSettings.TranslationTimeout);
+                request.UseExecute(x => x.AddRequestHeaders<TranslationResponse>());
+                var translationResponse = await request.GetResponse<TranslationResponse>();
 
-            return translationResponse.Message;
+                if (translationResponse.Message.StatusCode != 200)
+                {
+                    throw new TranslationWorkerException(translationResponse.Message.StatusCode, translationResponse.Message.Status);
+                }
+
+                var response = _mapper.Map<TranslationServiceResponse>(translationResponse.Message);
+
+                return response;
+            }
+            catch (RequestTimeoutException)
+            {
+                // Convert exception to service specific non RabbitMQ exception
+                throw new TranslationTimeoutException();
+            }
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using GreenPipes;
 using MassTransit;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Tilde.MT.TranslationAPIService.Exceptions.DomainDetection;
 using Tilde.MT.TranslationAPIService.Extensions.MassTransit;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
 using Tilde.MT.TranslationAPIService.Models.RabbitMQ.DomainDetection;
@@ -27,16 +27,28 @@ namespace Tilde.MT.TranslationAPIService.Services
         /// <summary>
         /// Detect domain using domain detection worker
         /// </summary>
-        /// <param name="detectionRequest"></param>
-        /// <exception cref="RequestTimeoutException">Message is not being received in configured timeout period via RabbitMQ</exception>
+        /// <exception cref="DomainDetectionTimeoutException">Message is not being received in configured timeout period via RabbitMQ</exception>
         /// <returns></returns>
-        public async Task<DomainDetectionResponse> Detect(DomainDetectionRequest detectionRequest)
+        public async Task<string> Detect(string sourceLanguage, List<string> text)
         {
-            using var request = _requestClient.Create(detectionRequest, timeout: _configurationSettings.DomainDetectionTimeout);
-            request.UseExecute(x => x.AddRequestHeaders<DomainDetectionResponse>());
-            var translationResponse = await request.GetResponse<DomainDetectionResponse>();
+            var detectionRequest = new DomainDetectionRequest()
+            {
+                SourceLanguage = sourceLanguage,
+                Text = text
+            };
 
-            return translationResponse.Message;
+            try
+            {
+                using var request = _requestClient.Create(detectionRequest, timeout: _configurationSettings.DomainDetectionTimeout);
+                request.UseExecute(x => x.AddRequestHeaders<DomainDetectionResponse>());
+                var translationResponse = await request.GetResponse<DomainDetectionResponse>();
+
+                return translationResponse.Message.Domain;
+            }
+            catch (RequestTimeoutException)
+            {
+                throw new DomainDetectionTimeoutException();
+            }
         }
     }
 }
