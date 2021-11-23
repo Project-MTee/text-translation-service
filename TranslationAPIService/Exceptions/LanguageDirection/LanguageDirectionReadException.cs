@@ -4,7 +4,7 @@ namespace Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection
 {
     public class LanguageDirectionReadException : Exception
     {
-        public LanguageDirectionReadException() : base("Lanuage directions cannot be read")
+        public LanguageDirectionReadException() : base("Language directions cannot be read")
         {
 
         }
