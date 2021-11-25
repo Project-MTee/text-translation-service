@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Annotations;
@@ -9,6 +8,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Controllers;
 using Tilde.MT.TranslationAPIService.Enums;
+using Tilde.MT.TranslationAPIService.Exceptions.DomainDetection;
 using Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection;
 using Tilde.MT.TranslationAPIService.Exceptions.Translation;
 using Tilde.MT.TranslationAPIService.Models.DTO.Translation;
@@ -85,14 +85,18 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
                     _logger.LogDebug("Request domain detection, domain not provided");
                     detectedDomain = await _domainDetectionService.Detect(request.SourceLanguage, request.Text);
                 }
-                catch (RequestTimeoutException)
+                catch (DomainDetectionTimeoutException)
                 {
+                    detectedDomain = "general";
+
                     _logger.LogWarning("Domain detection timed out");
 
                     /*return FormatTranslationError(HttpStatusCode.GatewayTimeout, ErrorSubCode.GatewayDomainDetectionTimedOut);*/
                 }
                 catch (Exception ex)
                 {
+                    detectedDomain = "general";
+
                     _logger.LogWarning(ex, "Domain detection failed");
 
                     /*return FormatTranslationError(HttpStatusCode.InternalServerError, ErrorSubCode.GatewayDomainDetectionGeneric);*/
