@@ -24,8 +24,6 @@ namespace Tilde.MT.TranslationAPIService.Services
 
         private readonly SemaphoreSlim semaphore = new(1, 1);
 
-        private readonly TimeSpan expiration = TimeSpan.FromHours(1);
-
         public LanguageDirectionService(
             ILogger<LanguageDirectionService> logger,
             IMemoryCache memoryCache,
@@ -50,7 +48,6 @@ namespace Tilde.MT.TranslationAPIService.Services
             {
                 await semaphore.WaitAsync();
 
-
                 var languageDirections = await _cache.GetOrCreateAsync(MemoryCacheKeys.LanguageDirections, async (cacheEntry) =>
                 {
                     var client = _clientFactory.CreateClient();
@@ -63,7 +60,7 @@ namespace Tilde.MT.TranslationAPIService.Services
 
                     var languageDirections = JsonSerializer.Deserialize<LanguageDirectionsResponse>(jsonString);
 
-                    cacheEntry.SetAbsoluteExpiration(expiration);
+                    cacheEntry.SetAbsoluteExpiration(_serviceConfiguration.TranslationSystem.CacheTTL);
 
                     return languageDirections.LanguageDirections;
                 });
