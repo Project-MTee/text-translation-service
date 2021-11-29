@@ -39,7 +39,9 @@ namespace Tilde.MT.TranslationAPIService.Services
         {
             try
             {
-                using var request = _requestClient.Create(translationRequest, timeout: _configurationSettings.TranslationTimeout);
+                var translationRequestMessage = _mapper.Map<Models.RabbitMQ.Translation.TranslationRequest>(translationRequest);
+
+                using var request = _requestClient.Create(translationRequestMessage, timeout: _configurationSettings.TranslationTimeout);
                 request.UseExecute(x => x.AddRequestHeaders<TranslationResponse>());
                 var translationResponse = await request.GetResponse<TranslationResponse>();
 

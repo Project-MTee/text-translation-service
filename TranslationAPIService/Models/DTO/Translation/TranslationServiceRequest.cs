@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Tilde.MT.TranslationAPIService.Enums;
 
 namespace Tilde.MT.TranslationAPIService.Models.DTO.Translation
 {
@@ -8,6 +9,6 @@ namespace Tilde.MT.TranslationAPIService.Models.DTO.Translation
         public string SourceLanguage { get; init; }
         public string TargetLanguage { get; init; }
         public string Domain { get; init; }
-        public string InputType { get; init; }
+        public TranslationType InputType { get; init; }
     }
 }

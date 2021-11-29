@@ -21,12 +21,12 @@ using Tilde.MT.TranslationAPIService.Models.LanguageDirectionService.LanguageDir
 
 namespace TranslationAPIService.Tests.UnitTests.LanguageDirectionService
 {
-    public class LanguageDirectionServiceTest
+    public class LanguageDirectionServiceTests
     {
         private readonly IOptions<ConfigurationServices> options;
         private readonly HttpResponseMessage apiResponse;
 
-        public LanguageDirectionServiceTest()
+        public LanguageDirectionServiceTests()
         {
             options = Options.Create(new ConfigurationServices()
             {

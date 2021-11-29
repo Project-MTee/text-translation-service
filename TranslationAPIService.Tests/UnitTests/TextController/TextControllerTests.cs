@@ -43,7 +43,7 @@ namespace TranslationAPIService.Tests.UnitTests.TextController
                     var result = new TranslationServiceRequest()
                     {
                         Domain = source.Domain,
-                        InputType = source.InputType.ToString(),
+                        InputType = source.InputType,
                         SourceLanguage = source.SourceLanguage,
                         TargetLanguage = source.TargetLanguage,
                         Text = source.Text
@@ -102,7 +102,7 @@ namespace TranslationAPIService.Tests.UnitTests.TextController
             var domainDetectionService = new Mock<IDomainDetectionService>();
             domainDetectionService
                 .Setup(m => m.Detect(It.IsAny<string>(), It.IsAny<List<string>>()))
-                .ThrowsAsync(new DomainDetectionTimeoutException(TimeSpan.FromSeconds(77)));
+                .ThrowsAsync(new DomainDetectionTimeoutException(TimeSpan.Zero));
 
             var controller = new Tilde.MT.TranslationAPIService.Controllers.TextController(
                 Mock.Of<ILogger<Tilde.MT.TranslationAPIService.Controllers.TextController>>(),
@@ -200,7 +200,7 @@ namespace TranslationAPIService.Tests.UnitTests.TextController
             var translationService = new Mock<ITranslationService>();
             translationService
                 .Setup(m => m.Translate(It.IsAny<TranslationServiceRequest>()))
-                .ThrowsAsync(new TranslationTimeoutException(TimeSpan.FromSeconds(77)));
+                .ThrowsAsync(new TranslationTimeoutException(TimeSpan.Zero));
 
             var controller = new Tilde.MT.TranslationAPIService.Controllers.TextController(
                 Mock.Of<ILogger<Tilde.MT.TranslationAPIService.Controllers.TextController>>(),
