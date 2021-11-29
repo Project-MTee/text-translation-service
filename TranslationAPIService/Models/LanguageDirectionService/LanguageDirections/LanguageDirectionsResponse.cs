@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Tilde.MT.TranslationAPIService.Models.DTO.LanguageDirections
+namespace Tilde.MT.TranslationAPIService.Models.LanguageDirectionService.LanguageDirections
 {
     public record LanguageDirectionsResponse
     {

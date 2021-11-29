@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection;
 using Tilde.MT.TranslationAPIService.Models;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
-using Tilde.MT.TranslationAPIService.Models.DTO.LanguageDirections;
+using Tilde.MT.TranslationAPIService.Models.LanguageDirectionService.LanguageDirections;
 
 namespace Tilde.MT.TranslationAPIService.Services
 {
