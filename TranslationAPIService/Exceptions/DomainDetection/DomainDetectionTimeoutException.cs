@@ -4,7 +4,8 @@ namespace Tilde.MT.TranslationAPIService.Exceptions.DomainDetection
 {
     public class DomainDetectionTimeoutException : Exception
     {
-        public DomainDetectionTimeoutException() : base("Domain detection timeout")
+        public DomainDetectionTimeoutException(TimeSpan timeout):
+            base($"Domain detection timed out in: {timeout}")
         {
 
         }

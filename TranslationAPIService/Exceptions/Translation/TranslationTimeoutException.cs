@@ -2,9 +2,10 @@
 
 namespace Tilde.MT.TranslationAPIService.Exceptions.Translation
 {
-    public class TranslationTimeoutException : Exception
+    public class TranslationTimeoutException: Exception
     {
-        public TranslationTimeoutException() : base("Translation request timed out")
+        public TranslationTimeoutException(TimeSpan timeout) : 
+            base($"Translation request timed out in: {timeout}")
         {
 
         }

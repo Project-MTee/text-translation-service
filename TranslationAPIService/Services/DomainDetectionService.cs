@@ -47,7 +47,7 @@ namespace Tilde.MT.TranslationAPIService.Services
             }
             catch (RequestTimeoutException)
             {
-                throw new DomainDetectionTimeoutException();
+                throw new DomainDetectionTimeoutException(_configurationSettings.DomainDetectionTimeout);
             }
         }
     }

@@ -55,7 +55,7 @@ namespace Tilde.MT.TranslationAPIService.Services
             catch (RequestTimeoutException)
             {
                 // Convert exception to service specific non RabbitMQ exception
-                throw new TranslationTimeoutException();
+                throw new TranslationTimeoutException(_configurationSettings.TranslationTimeout);
             }
         }
     }

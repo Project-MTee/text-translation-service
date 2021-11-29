@@ -3,19 +3,16 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Moq.Protected;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Tilde.MT.TranslationAPIService.Exceptions.DomainDetection;
+using Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection;
+using Tilde.MT.TranslationAPIService.Exceptions.Translation;
 using Tilde.MT.TranslationAPIService.Models.DTO.Translation;
+using Tilde.MT.TranslationAPIService.Models.Errors;
 using Tilde.MT.TranslationAPIService.Services;
 using Xunit;
-using Tilde.MT.TranslationAPIService.Exceptions.DomainDetection;
-using System;
-using Tilde.MT.TranslationAPIService.Exceptions.Translation;
-using Tilde.MT.TranslationAPIService.Models.Errors;
-using System.Net;
-using Tilde.MT.TranslationAPIService.Enums;
-using Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection;
 
 namespace TranslationAPIService.Tests.UnitTests.TextController
 {
@@ -54,7 +51,7 @@ namespace TranslationAPIService.Tests.UnitTests.TextController
 
                     return result;
                 });
-            
+
             mapper = mapperMock.Object;
         }
 
@@ -105,7 +102,7 @@ namespace TranslationAPIService.Tests.UnitTests.TextController
             var domainDetectionService = new Mock<IDomainDetectionService>();
             domainDetectionService
                 .Setup(m => m.Detect(It.IsAny<string>(), It.IsAny<List<string>>()))
-                .ThrowsAsync(new DomainDetectionTimeoutException());
+                .ThrowsAsync(new DomainDetectionTimeoutException(TimeSpan.FromSeconds(77)));
 
             var controller = new Tilde.MT.TranslationAPIService.Controllers.TextController(
                 Mock.Of<ILogger<Tilde.MT.TranslationAPIService.Controllers.TextController>>(),
@@ -190,7 +187,7 @@ namespace TranslationAPIService.Tests.UnitTests.TextController
             translationResult.Domain.Should().NotBeNullOrEmpty();
 
             // Segment count in translation should not vary, they should be the same.
-            translationRequest.Text.Count.Should().Be(message.Text.Count); 
+            translationRequest.Text.Count.Should().Be(message.Text.Count);
         }
 
         [Fact]
@@ -203,7 +200,7 @@ namespace TranslationAPIService.Tests.UnitTests.TextController
             var translationService = new Mock<ITranslationService>();
             translationService
                 .Setup(m => m.Translate(It.IsAny<TranslationServiceRequest>()))
-                .ThrowsAsync(new TranslationTimeoutException());
+                .ThrowsAsync(new TranslationTimeoutException(TimeSpan.FromSeconds(77)));
 
             var controller = new Tilde.MT.TranslationAPIService.Controllers.TextController(
                 Mock.Of<ILogger<Tilde.MT.TranslationAPIService.Controllers.TextController>>(),
@@ -306,12 +303,12 @@ namespace TranslationAPIService.Tests.UnitTests.TextController
 
             var message = translationRequest with { Domain = null };
 
-            var languageDirectionService = new Mock<ILanguageDirectionService>();  
+            var languageDirectionService = new Mock<ILanguageDirectionService>();
             languageDirectionService
-                .Setup(m=> m.Validate(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .Returns((string domain, string sourceLanguage, string targetLanguage) => 
+                .Setup(m => m.Validate(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns((string domain, string sourceLanguage, string targetLanguage) =>
                 {
-                    throw new LanguageDirectionNotFoundException(domain, sourceLanguage, targetLanguage);      
+                    throw new LanguageDirectionNotFoundException(domain, sourceLanguage, targetLanguage);
                 });
             var controller = new Tilde.MT.TranslationAPIService.Controllers.TextController(
                 Mock.Of<ILogger<Tilde.MT.TranslationAPIService.Controllers.TextController>>(),
