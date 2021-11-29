@@ -1,23 +1,23 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using FluentAssertions;
+using MemoryCache.Testing.Moq;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.Protected;
-using System.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection;
+using Tilde.MT.TranslationAPIService.Models;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
 using Tilde.MT.TranslationAPIService.Models.Configuration.Services;
-using Xunit;
-using FluentAssertions;
-using MemoryCache.Testing.Moq;
-using Tilde.MT.TranslationAPIService.Models;
 using Tilde.MT.TranslationAPIService.Models.LanguageDirectionService.LanguageDirections;
+using Xunit;
 
 namespace TranslationAPIService.Tests.UnitTests.LanguageDirectionService
 {
@@ -25,6 +25,8 @@ namespace TranslationAPIService.Tests.UnitTests.LanguageDirectionService
     {
         private readonly IOptions<ConfigurationServices> options;
         private readonly HttpResponseMessage apiResponse;
+        private readonly Mock<HttpMessageHandler> httpClientHandler;
+        private readonly IHttpClientFactory httpClientFactory;
 
         public LanguageDirectionServiceTests()
         {
@@ -65,6 +67,26 @@ namespace TranslationAPIService.Tests.UnitTests.LanguageDirectionService
                     )
                 )
             };
+
+            httpClientHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+
+            httpClientHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(apiResponse)
+                .Verifiable();
+
+            var httpClient = new HttpClient(httpClientHandler.Object);
+
+            var mockHttpClientFactory = new Mock<IHttpClientFactory>();
+
+            mockHttpClientFactory.Setup(_ => _.CreateClient(string.Empty)).Returns(httpClient);
+
+            httpClientFactory = mockHttpClientFactory.Object;
         }
 
         [Fact]
@@ -75,13 +97,10 @@ namespace TranslationAPIService.Tests.UnitTests.LanguageDirectionService
             var sourceLanguage = "et";
             var targetLanguage = "en";
 
-            int apiRequestsOfset;
-            var httpFactoryHelper = new HttpClientObservableHelper(apiResponse);
-
             var service = new Tilde.MT.TranslationAPIService.Services.LanguageDirectionService(
                 Mock.Of<ILogger<Tilde.MT.TranslationAPIService.Services.LanguageDirectionService>>(),
                 Create.MockedMemoryCache(),
-                httpFactoryHelper.httpClientFactory,
+                httpClientFactory,
                 options
             );
 
@@ -92,10 +111,9 @@ namespace TranslationAPIService.Tests.UnitTests.LanguageDirectionService
 
             // Store cache from api response
             await service.Validate(domain, sourceLanguage, targetLanguage);
-            apiRequestsOfset = httpFactoryHelper.ApiRequests;
 
             var task = service.Validate(domain, sourceLanguage, targetLanguage);
-            
+
             ctsStore.Token.Register(() =>
             {
                 // Check if cache is stored
@@ -108,21 +126,24 @@ namespace TranslationAPIService.Tests.UnitTests.LanguageDirectionService
 
             // --- Assert
 
-            apiRequestsOfset.Should().Be(1);
-            apiRequestsOfset.Should().Be(httpFactoryHelper.ApiRequests);
+            httpClientHandler.Protected().Verify(
+               "SendAsync",
+               Times.Exactly(1),
+               ItExpr.Is<HttpRequestMessage>(req =>
+                  req.Method == HttpMethod.Get
+               ),
+               ItExpr.IsAny<CancellationToken>()
+            );
         }
 
         [Fact]
         public async Task CacheIsNotUsed_WhenCacheIsExpired()
         {
             // --- Arrange
-
+            
             var domain = "finance";
             var sourceLanguage = "et";
             var targetLanguage = "en";
-
-            int apiRequestsOfset;
-            var httpFactoryHelper = new HttpClientObservableHelper(apiResponse);
 
             var memoryCache = Mock.Of<IMemoryCache>();
             var cachEntry = Mock.Of<ICacheEntry>();
@@ -135,7 +156,7 @@ namespace TranslationAPIService.Tests.UnitTests.LanguageDirectionService
             var service = new Tilde.MT.TranslationAPIService.Services.LanguageDirectionService(
                 Mock.Of<ILogger<Tilde.MT.TranslationAPIService.Services.LanguageDirectionService>>(),
                 mockMemoryCache.Object,
-                httpFactoryHelper.httpClientFactory,
+                httpClientFactory,
                 options
             );
 
@@ -147,14 +168,18 @@ namespace TranslationAPIService.Tests.UnitTests.LanguageDirectionService
             // Hack to simulate mocked memory cache TTL
             memoryCache.Remove(MemoryCacheKeys.LanguageDirections);
 
-            apiRequestsOfset = httpFactoryHelper.ApiRequests;
-            
             await service.Validate(domain, sourceLanguage, targetLanguage);
 
             // --- Assert
 
-            apiRequestsOfset.Should().Be(1);
-            httpFactoryHelper.ApiRequests.Should().Be(2);
+            httpClientHandler.Protected().Verify(
+               "SendAsync",
+               Times.Exactly(2),
+               ItExpr.Is<HttpRequestMessage>(req =>
+                  req.Method == HttpMethod.Get
+               ),
+               ItExpr.IsAny<CancellationToken>()
+            );
         }
 
         [Theory]
@@ -169,13 +194,11 @@ namespace TranslationAPIService.Tests.UnitTests.LanguageDirectionService
         public async Task ValidationProcessCorrect(string sourceLanguage, string targetLanguage, string domain, bool valid)
         {
             // --- Arrange
-
-            var httpFactoryHelper = new HttpClientObservableHelper(apiResponse);
-
+            
             var service = new Tilde.MT.TranslationAPIService.Services.LanguageDirectionService(
                 Mock.Of<ILogger<Tilde.MT.TranslationAPIService.Services.LanguageDirectionService>>(),
                 Create.MockedMemoryCache(),
-                httpFactoryHelper.httpClientFactory,
+                httpClientFactory,
                 options
             );
 
@@ -190,6 +213,15 @@ namespace TranslationAPIService.Tests.UnitTests.LanguageDirectionService
             if (valid)
             {
                 exception.Should().BeNull();
+
+                httpClientHandler.Protected().Verify(
+                   "SendAsync",
+                   Times.Exactly(1),
+                   ItExpr.Is<HttpRequestMessage>(req =>
+                      req.Method == HttpMethod.Get
+                   ),
+                   ItExpr.IsAny<CancellationToken>()
+                );
             }
             else
             {
