@@ -60,7 +60,7 @@ namespace TranslationAPIService.Tests.UnitTests.TextController
 
         #region Helpers
 
-        private ITranslationService MockSuccessTranslationService()
+        private static ITranslationService MockSuccessTranslationService()
         {
             var translationService = new Mock<ITranslationService>();
             translationService
@@ -78,7 +78,7 @@ namespace TranslationAPIService.Tests.UnitTests.TextController
             return translationService.Object;
         }
 
-        private IDomainDetectionService MockSuccessDomainDetection()
+        private static IDomainDetectionService MockSuccessDomainDetection()
         {
             var domainDetectionService = new Mock<IDomainDetectionService>();
             domainDetectionService

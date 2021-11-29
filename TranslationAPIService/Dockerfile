@@ -20,15 +20,14 @@ COPY . .
 # build service
 WORKDIR "/src/TranslationAPIService"
 RUN dotnet build "TranslationAPIService.csproj" -c $CONFIGURATION -o /app/build
-# build tests
-WORKDIR "/src/TranslationAPIService.Tests"
-RUN dotnet build "TranslationAPIService.Tests.csproj" -c $CONFIGURATION
 
 # ---------------------------------------------------
 FROM build AS tested-build
 
+ARG CONFIGURATION=Release
+
 WORKDIR "/src/TranslationAPIService.Tests"
-RUN dotnet test
+RUN dotnet test -c $CONFIGURATION
 
 # ---------------------------------------------------
 FROM tested-build AS publish
