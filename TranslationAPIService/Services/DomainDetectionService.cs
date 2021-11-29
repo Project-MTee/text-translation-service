@@ -10,7 +10,7 @@ using Tilde.MT.TranslationAPIService.Models.RabbitMQ.DomainDetection;
 
 namespace Tilde.MT.TranslationAPIService.Services
 {
-    public class DomainDetectionService
+    public class DomainDetectionService: IDomainDetectionService
     {
         private readonly ConfigurationSettings _configurationSettings;
         private readonly IRequestClient<DomainDetectionRequest> _requestClient;

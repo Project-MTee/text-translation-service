@@ -15,7 +15,7 @@ using Tilde.MT.TranslationAPIService.Models.DTO.LanguageDirections;
 
 namespace Tilde.MT.TranslationAPIService.Services
 {
-    public class LanguageDirectionService
+    public class LanguageDirectionService: ILanguageDirectionService
     {
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;

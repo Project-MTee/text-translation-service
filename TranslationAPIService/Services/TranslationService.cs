@@ -11,7 +11,7 @@ using Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation;
 
 namespace Tilde.MT.TranslationAPIService.Services
 {
-    public class TranslationService
+    public class TranslationService: ITranslationService
     {
         private readonly ConfigurationSettings _configurationSettings;
         private readonly IRequestClient<Models.RabbitMQ.Translation.TranslationRequest> _requestClient;

@@ -43,9 +43,9 @@ namespace Tilde.MT.TranslationAPIService
 
             services.AddMessaging(Configuration);
 
-            services.AddScoped<DomainDetectionService>();
-            services.AddScoped<TranslationService>();
-            services.AddSingleton<LanguageDirectionService>();
+            services.AddScoped<IDomainDetectionService, DomainDetectionService>();
+            services.AddScoped<ITranslationService, TranslationService>();
+            services.AddSingleton<ILanguageDirectionService, LanguageDirectionService>();
 
             services.AddClientErrorProcessing();
         }

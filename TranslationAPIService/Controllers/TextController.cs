@@ -6,7 +6,6 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Tilde.MT.TranslationAPIService.Controllers;
 using Tilde.MT.TranslationAPIService.Enums;
 using Tilde.MT.TranslationAPIService.Exceptions.DomainDetection;
 using Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection;
@@ -15,7 +14,7 @@ using Tilde.MT.TranslationAPIService.Models.DTO.Translation;
 using Tilde.MT.TranslationAPIService.Models.Errors;
 using Tilde.MT.TranslationAPIService.Services;
 
-namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
+namespace Tilde.MT.TranslationAPIService.Controllers
 {
     /// <summary>
     /// API for text translation
@@ -26,16 +25,16 @@ namespace Tilde.MT.TranslationAPIService.TranslationAPI.Controllers
     {
         private readonly ILogger<TextController> _logger;
         private readonly IMapper _mapper;
-        private readonly TranslationService _translationService;
-        private readonly DomainDetectionService _domainDetectionService;
-        private readonly LanguageDirectionService _languageDirectionService;
+        private readonly ITranslationService _translationService;
+        private readonly IDomainDetectionService _domainDetectionService;
+        private readonly ILanguageDirectionService _languageDirectionService;
 
         public TextController(
             ILogger<TextController> logger,
             IMapper mapper,
-            TranslationService translationService,
-            DomainDetectionService domainDetectionService,
-            LanguageDirectionService languageDirectionService
+            ITranslationService translationService,
+            IDomainDetectionService domainDetectionService,
+            ILanguageDirectionService languageDirectionService
         )
         {
             _logger = logger;
