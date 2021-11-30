@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Exceptions.DomainDetection;
 using Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection;
 using Tilde.MT.TranslationAPIService.Exceptions.Translation;
+using Tilde.MT.TranslationAPIService.Interfaces.Services;
 using Tilde.MT.TranslationAPIService.Models.DTO.Translation;
 using Tilde.MT.TranslationAPIService.Models.Errors;
 using Tilde.MT.TranslationAPIService.Services;

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Exceptions.Translation;
 using Tilde.MT.TranslationAPIService.Extensions.MassTransit;
+using Tilde.MT.TranslationAPIService.Interfaces.Services;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
 using Tilde.MT.TranslationAPIService.Models.DTO.Translation;
 using Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation;

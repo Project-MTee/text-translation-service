@@ -9,13 +9,14 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection;
+using Tilde.MT.TranslationAPIService.Interfaces.Services;
 using Tilde.MT.TranslationAPIService.Models;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
-using Tilde.MT.TranslationAPIService.Models.LanguageDirectionService.LanguageDirections;
+using Tilde.MT.TranslationAPIService.Models.External.LanguageDirectionService.LanguageDirections;
 
 namespace Tilde.MT.TranslationAPIService.Services
 {
-    public class LanguageDirectionService: ILanguageDirectionService
+    public class LanguageDirectionService : ILanguageDirectionService
     {
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;

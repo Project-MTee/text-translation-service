@@ -16,7 +16,7 @@ using Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection;
 using Tilde.MT.TranslationAPIService.Models;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
 using Tilde.MT.TranslationAPIService.Models.Configuration.Services;
-using Tilde.MT.TranslationAPIService.Models.LanguageDirectionService.LanguageDirections;
+using Tilde.MT.TranslationAPIService.Models.External.LanguageDirectionService.LanguageDirections;
 using Xunit;
 
 namespace TranslationAPIService.Tests.UnitTests.LanguageDirectionService

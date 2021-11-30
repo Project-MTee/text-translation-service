@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Tilde.MT.TranslationAPIService.Extensions;
+using Tilde.MT.TranslationAPIService.Interfaces.Services;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
 using Tilde.MT.TranslationAPIService.Models.Mappings;
 using Tilde.MT.TranslationAPIService.Services;

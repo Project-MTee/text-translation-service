@@ -5,6 +5,7 @@ services:
       dockerfile: ./TranslationAPIService/Dockerfile
       args:
         CONFIGURATION: $CONFIGURATION
+    # image: ghcr.io/project-mtee/translation-api-service:1.2.14
     ports:
       - "5003:80"
     env_file:
