@@ -7,6 +7,6 @@ namespace Tilde.MT.TranslationAPIService.Models.DTO.Translation
         /// <summary>
         /// Translation result
         /// </summary>
-        public IEnumerable<string> Translations { get; init; }
+        public List<string> Translations { get; init; }
     }
 }

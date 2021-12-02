@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Exceptions.Translation;
@@ -43,7 +44,7 @@ namespace TranslationAPIService.Tests.UnitTests.TranslationService
                 {
                     return new TranslationServiceResponse()
                     {
-                        Translations = rabbitResponse.Translations
+                        Translations = rabbitResponse.Translations.ToList()
                     };
                 });
             mapper

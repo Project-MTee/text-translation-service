@@ -6,7 +6,7 @@ namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation
     public record TranslationRequest
     {
         [JsonProperty("text")]
-        public List<string> Text { get; init; }
+        public IEnumerable<string> Text { get; init; }
         [JsonProperty("src")]
         public string SourceLanguage { get; init; }
         [JsonProperty("tgt")]
