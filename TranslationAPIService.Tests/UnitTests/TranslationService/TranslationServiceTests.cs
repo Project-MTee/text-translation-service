@@ -41,46 +41,58 @@ namespace TranslationAPIService.Tests.UnitTests.TranslationService
                 .Setup(m => m.Map<TranslationServiceResponse>(It.IsAny<TranslationResponse>()))
                 .Returns((TranslationResponse rabbitResponse) =>
                 {
-                    return Task.FromResult(new TranslationServiceResponse()
+                    return new TranslationServiceResponse()
                     {
                         Translations = rabbitResponse.Translations
-                    });
+                    };
                 });
             mapper
                 .Setup(m => m.Map<Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest>(It.IsAny<TranslationServiceRequest>()))
                 .Returns((TranslationServiceRequest request) =>
                 {
-                    Task.FromResult(new Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest()
+                    return new Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest()
                     {
                         Domain = request.Domain,
                         InputType = request.InputType.ToString(),
                         SourceLanguage = request.SourceLanguage,
                         TargetLanguage = request.TargetLanguage,
                         Text = request.Text
-                    });
+                    };
                 });
             this.mapper = mapper.Object;
         }
 
-        /*[Fact]
-        public async Task TimeoutException_WhenTimeoutDetected()
+        [Fact]
+        public async Task ErrorIsReturned_WhenTimeoutDetected()
         {
             // --- Arrange
 
             var options = Options.Create(new ConfigurationSettings()
             {
-                TranslationTimeout = TimeSpan.Zero
+                TranslationTimeout = TimeSpan.FromSeconds(10)
             });
-
-            var requestHandler = new Mock<RequestHandle<Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest>>();
-
 
             var mtRequestClient = new Mock<IRequestClient<Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest>>();
             mtRequestClient
                 .Setup(m => m.Create(It.IsAny<Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest>(), It.IsAny<CancellationToken>(), It.IsAny<RequestTimeout>()))
                 .Returns((Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest message, CancellationToken cancellationToken, RequestTimeout timeout) =>
                 {
-                    return Task.FromResult(requestHandler.Object);
+                    var consumeContext = new Mock<ConsumeContext<TranslationResponse>>();
+                    consumeContext
+                        .SetupGet(m => m.Message)
+                        .Returns(new TranslationResponse()
+                        {
+                            StatusMessage = "",
+                            StatusCode = 200,
+                            Translations = message.Text
+                        });
+
+                    var requestHandler = new Mock<RequestHandle<Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest>>();
+                    requestHandler
+                        .Setup(m => m.GetResponse<TranslationResponse>(It.IsAny<bool>()))
+                        .Throws(new TranslationTimeoutException(options.Value.TranslationTimeout));
+
+                    return requestHandler.Object;
                 });
 
             var service = new Tilde.MT.TranslationAPIService.Services.TranslationService(
@@ -98,6 +110,110 @@ namespace TranslationAPIService.Tests.UnitTests.TranslationService
             // --- Assert
 
             exception.Should().BeOfType<TranslationTimeoutException>();
-        }*/
+        }
+
+        [Fact]
+        public async Task ErrorIsReturned_When()
+        {
+            // --- Arrange
+
+            var options = Options.Create(new ConfigurationSettings()
+            {
+                TranslationTimeout = TimeSpan.FromSeconds(10)
+            });
+
+            var mtRequestClient = new Mock<IRequestClient<Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest>>();
+            mtRequestClient
+                .Setup(m => m.Create(It.IsAny<Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest>(), It.IsAny<CancellationToken>(), It.IsAny<RequestTimeout>()))
+                .Returns((Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest message, CancellationToken cancellationToken, RequestTimeout timeout) =>
+                {
+                    var responseMessage = new TranslationResponse()
+                    {
+                        StatusMessage = "status message",
+                        StatusCode = 500,
+                        Translations = message.Text
+                    };
+
+                    var consumeContext = new Mock<ConsumeContext<TranslationResponse>>();
+                    consumeContext
+                        .SetupGet(m => m.Message)
+                        .Returns(responseMessage);
+
+                    var requestHandler = new Mock<RequestHandle<Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest>>();
+                    requestHandler
+                        .Setup(m => m.GetResponse<TranslationResponse>(It.IsAny<bool>()))
+                        .Throws(new TranslationWorkerException(responseMessage.StatusCode, responseMessage.StatusMessage));
+
+                    return requestHandler.Object;
+                });
+
+            var service = new Tilde.MT.TranslationAPIService.Services.TranslationService(
+                mapper,
+                options,
+                mtRequestClient.Object
+            );
+            // --- Act
+
+            var exception = await Record.ExceptionAsync(async () =>
+            {
+                await service.Translate(translationRequest);
+            });
+
+            // --- Assert
+
+            exception.Should().BeOfType<TranslationWorkerException>();
+        }
+
+        [Fact]
+        public async Task TranslationIsReturned_WhenTranslationSuceeds()
+        {
+            // --- Arrange
+
+            var options = Options.Create(new ConfigurationSettings()
+            {
+                TranslationTimeout = TimeSpan.FromSeconds(10)
+            });
+
+            var mtRequestClient = new Mock<IRequestClient<Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest>>();
+            mtRequestClient
+                .Setup(m => m.Create(It.IsAny<Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest>(), It.IsAny<CancellationToken>(), It.IsAny<RequestTimeout>()))
+                .Returns((Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest message, CancellationToken cancellationToken, RequestTimeout timeout) =>
+                {
+                    var consumeContext = new Mock<ConsumeContext<TranslationResponse>>();
+                    consumeContext
+                        .SetupGet(m => m.Message)
+                        .Returns(new TranslationResponse()
+                        {
+                            StatusMessage = "",
+                            StatusCode = 200,
+                            Translations = message.Text
+                        });
+
+                    var requestHandler = new Mock<RequestHandle<Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation.TranslationRequest>>();
+                    requestHandler
+                        .Setup(m => m.GetResponse<TranslationResponse>(It.IsAny<bool>()))
+                        .Returns((bool send) =>
+                        {
+                            Response<TranslationResponse> response = new MassTransit.Clients.MessageResponse<TranslationResponse>(consumeContext.Object);
+                            return Task.FromResult(response);
+                        });
+
+                    return requestHandler.Object;
+                });
+
+            var service = new Tilde.MT.TranslationAPIService.Services.TranslationService(
+                mapper,
+                options,
+                mtRequestClient.Object
+            );
+            // --- Act
+
+            var result = await service.Translate(translationRequest);
+
+            // --- Assert
+
+            result.Should().NotBeNull();
+            result.Translations.Should().HaveCount(translationRequest.Text.Count);
+        }
     }
 }

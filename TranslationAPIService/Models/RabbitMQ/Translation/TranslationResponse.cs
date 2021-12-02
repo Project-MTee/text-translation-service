@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation
 {
@@ -8,6 +9,6 @@ namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation
         /// Translation result
         /// </summary>
         [JsonProperty("translation")]
-        public string[] Translations { get; init; }
+        public IEnumerable<string> Translations { get; init; }
     }
 }

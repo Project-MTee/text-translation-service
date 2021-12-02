@@ -48,7 +48,7 @@ namespace Tilde.MT.TranslationAPIService.Services
 
                 if (translationResponse.Message.StatusCode != 200)
                 {
-                    throw new TranslationWorkerException(translationResponse.Message.StatusCode, translationResponse.Message.Status);
+                    throw new TranslationWorkerException(translationResponse.Message.StatusCode, translationResponse.Message.StatusMessage);
                 }
 
                 var response = _mapper.Map<TranslationServiceResponse>(translationResponse.Message);

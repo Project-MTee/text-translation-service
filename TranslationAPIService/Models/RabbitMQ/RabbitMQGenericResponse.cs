@@ -13,6 +13,6 @@ namespace Tilde.MT.TranslationAPIService.Models.RabbitMQ
         /// human-readable error message or "OK"
         /// </summary>
         [JsonProperty("status")]
-        public string Status { get; init; }
+        public string StatusMessage { get; init; }
     }
 }

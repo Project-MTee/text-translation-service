@@ -17,12 +17,12 @@ using Xunit;
 
 namespace TranslationAPIService.Tests.UnitTests.TextController
 {
-    public class TextControllerTests
+    public class TextControllerGetTranslationTests
     {
         private readonly TranslationRequest translationRequest;
         private readonly IMapper mapper;
 
-        public TextControllerTests()
+        public TextControllerGetTranslationTests()
         {
             translationRequest = new TranslationRequest()
             {
