@@ -113,7 +113,7 @@ namespace TranslationAPIService.Tests.UnitTests.TranslationService
         }
 
         [Fact]
-        public async Task ErrorIsReturned_When()
+        public async Task ErrorIsReturned_WhenTranslationWorkerError()
         {
             // --- Arrange
 
