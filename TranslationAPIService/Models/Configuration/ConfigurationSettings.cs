@@ -11,6 +11,6 @@ namespace Tilde.MT.TranslationAPIService.Models.Configuration
         /// For example: 20480 -> 20KB
         /// </summary>
         public long RequestSizeLimit { get; init; }
-        public int TranslationRequestSegmentCount { get; init; } = 3;
+        public int TranslationRequestSegmentCount { get; init; } = 1;
     }
 }
