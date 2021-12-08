@@ -14,7 +14,7 @@ using Tilde.MT.TranslationAPIService.Models.RabbitMQ.Translation;
 
 namespace Tilde.MT.TranslationAPIService.Services
 {
-    public class TranslationService: ITranslationService
+    public class TranslationService : ITranslationService
     {
         private readonly ConfigurationSettings _configurationSettings;
         private readonly IRequestClient<Models.RabbitMQ.Translation.TranslationRequest> _requestClient;
@@ -42,7 +42,7 @@ namespace Tilde.MT.TranslationAPIService.Services
         {
             var originalMessage = _mapper.Map<Models.RabbitMQ.Translation.TranslationRequest>(translationRequest);
 
-            var chunkedMessages = originalMessage.Text.Chunk(_configurationSettings.TranslationRequestSegmentCount).Select(segments => originalMessage with { Text = segments }) ;
+            var chunkedMessages = originalMessage.Text.Chunk(_configurationSettings.TranslationRequestSegmentCount).Select(segments => originalMessage with { Text = segments });
 
             var response = new TranslationServiceResponse()
             {

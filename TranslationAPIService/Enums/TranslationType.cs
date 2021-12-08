@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Threading.Tasks;
-
-namespace Tilde.MT.TranslationAPIService.Enums
+﻿namespace Tilde.MT.TranslationAPIService.Enums
 {
     public enum TranslationType
     {
-        plain,
-        document,
-        web,
-        asr
+        plain = 0,
+        document = 1,
+        web = 2,
+        asr = 3
     }
 }
