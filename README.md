@@ -30,6 +30,37 @@ Public text translation service which communicates through **RabbitMQ** to send 
                       --------------------------------
 
 ```
+
+### Translation to MT system via RabbitMQ:
+
+| Parameter           | Value                                                                             |
+| ------------------- | --------------------------------------------------------------------------------- |
+| exchange            | translation                                                                       |
+| routing key         | translation.`{SourceLanguage}`.`{TargetLanguage}`.`{Domain}`.`{InputType}`        |
+
+### Domain detection via RabbitMQ:
+
+| Parameter           | Value                                                                             |
+| ------------------- | --------------------------------------------------------------------------------- |
+| exchange            | domain-detection                                                                  |
+| routing key         | domain-detection.`{SourceLanguage}`                                               |
+
+
+# Monitor
+
+## Healthcheck probes
+
+https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+
+Startup probe / Readiness probe:
+
+`/health/ready`
+
+Liveness probe:
+
+`/health/live`
+
+
 # Test
 
 Install prerequisites
