@@ -33,16 +33,25 @@ Public text translation service which communicates through **RabbitMQ** to send 
 
 ### Translation to MT system via RabbitMQ:
 
+> exchange created automatically on demand
+
+
 | Parameter           | Value                                                                             |
 | ------------------- | --------------------------------------------------------------------------------- |
 | exchange            | translation                                                                       |
+| exchange type       | direct                                                                            |
+| exchange options    |                                                                                   |
 | routing key         | translation.`{SourceLanguage}`.`{TargetLanguage}`.`{Domain}`.`{InputType}`        |
 
 ### Domain detection via RabbitMQ:
 
+> exchange created automatically on demand
+
 | Parameter           | Value                                                                             |
 | ------------------- | --------------------------------------------------------------------------------- |
 | exchange            | domain-detection                                                                  |
+| exchange type       | direct                                                                            |
+| exchange options    |                                                                                   |
 | routing key         | domain-detection.`{SourceLanguage}`                                               |
 
 
