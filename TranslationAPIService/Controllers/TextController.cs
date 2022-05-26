@@ -120,7 +120,7 @@ namespace Tilde.MT.TranslationAPIService.Controllers
             }
             catch (TranslationWorkerException ex)
             {
-                _logger.LogError($"Translation failed");
+                _logger.LogError(ex, "Translation failed");
 
                 return FormatAPIError(
                     HttpStatusCode.InternalServerError,
