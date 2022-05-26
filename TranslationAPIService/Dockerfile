@@ -10,11 +10,10 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 ARG CONFIGURATION=Release
 
 WORKDIR /src
-COPY ["TranslationAPIService.Tests/TranslationAPIService.Tests.csproj", "TranslationAPIService.Tests/"]
+
 COPY ["TranslationAPIService/TranslationAPIService.csproj", "TranslationAPIService/"]
-RUN dotnet restore "TranslationAPIService.Tests/TranslationAPIService.Tests.csproj"
 RUN dotnet restore "TranslationAPIService/TranslationAPIService.csproj"
-COPY . .
+COPY TranslationAPIService TranslationAPIService
 # build service
 WORKDIR "/src/TranslationAPIService"
 RUN dotnet build "TranslationAPIService.csproj" -c $CONFIGURATION -o /app/build
@@ -24,6 +23,10 @@ FROM build AS tested-build
 
 ARG CONFIGURATION=Release
 
+WORKDIR /src
+COPY ["TranslationAPIService.Tests/TranslationAPIService.Tests.csproj", "TranslationAPIService.Tests/"]
+RUN dotnet restore "TranslationAPIService.Tests/TranslationAPIService.Tests.csproj"
+COPY TranslationAPIService.Tests TranslationAPIService.Tests
 WORKDIR "/src/TranslationAPIService.Tests"
 RUN dotnet test -c $CONFIGURATION
 
