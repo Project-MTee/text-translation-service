@@ -1,9 +1,9 @@
 ﻿using GreenPipes;
 using MassTransit;
 using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tilde.MT.TranslationAPIService.Exceptions.DomainDetection;
 using Tilde.MT.TranslationAPIService.Extensions.MassTransit;
 using Tilde.MT.TranslationAPIService.Interfaces.Services;
 using Tilde.MT.TranslationAPIService.Models.Configuration;
@@ -28,7 +28,6 @@ namespace Tilde.MT.TranslationAPIService.Services
         /// <summary>
         /// Detect domain using domain detection worker
         /// </summary>
-        /// <exception cref="DomainDetectionTimeoutException">Message is not being received in configured timeout period via RabbitMQ</exception>
         /// <returns></returns>
         public async Task<string> Detect(string sourceLanguage, List<string> text)
         {
@@ -48,7 +47,7 @@ namespace Tilde.MT.TranslationAPIService.Services
             }
             catch (RequestTimeoutException)
             {
-                throw new DomainDetectionTimeoutException(_configurationSettings.DomainDetectionTimeout);
+                throw new TimeoutException($"Exception timed out in '{_configurationSettings.DomainDetectionTimeout}'");
             }
         }
     }

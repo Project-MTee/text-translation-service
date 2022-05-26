@@ -7,7 +7,6 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Tilde.MT.TranslationAPIService.Enums;
-using Tilde.MT.TranslationAPIService.Exceptions.DomainDetection;
 using Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection;
 using Tilde.MT.TranslationAPIService.Exceptions.Translation;
 using Tilde.MT.TranslationAPIService.Interfaces.Services;
@@ -83,14 +82,6 @@ namespace Tilde.MT.TranslationAPIService.Controllers
                 {
                     _logger.LogDebug("Request domain detection, domain not provided");
                     detectedDomain = await _domainDetectionService.Detect(request.SourceLanguage, request.Text);
-                }
-                catch (DomainDetectionTimeoutException)
-                {
-                    detectedDomain = "general";
-
-                    _logger.LogWarning("Domain detection timed out");
-
-                    /*return FormatTranslationError(HttpStatusCode.GatewayTimeout, ErrorSubCode.GatewayDomainDetectionTimedOut);*/
                 }
                 catch (Exception ex)
                 {
