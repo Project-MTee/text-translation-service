@@ -25,10 +25,7 @@ namespace Tilde.MT.TranslationAPIService.Services
             _requestClient = requestClient;
         }
 
-        /// <summary>
-        /// Detect domain using domain detection worker
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public async Task<string> Detect(string sourceLanguage, List<string> text)
         {
             var detectionRequest = new DomainDetectionRequest()
