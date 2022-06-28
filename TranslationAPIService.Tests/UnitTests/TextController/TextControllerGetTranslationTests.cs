@@ -6,7 +6,6 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tilde.MT.TranslationAPIService.Exceptions.DomainDetection;
 using Tilde.MT.TranslationAPIService.Exceptions.LanguageDirection;
 using Tilde.MT.TranslationAPIService.Exceptions.Translation;
 using Tilde.MT.TranslationAPIService.Interfaces.Services;
@@ -103,7 +102,7 @@ namespace TranslationAPIService.Tests.UnitTests.TextController
             var domainDetectionService = new Mock<IDomainDetectionService>();
             domainDetectionService
                 .Setup(m => m.Detect(It.IsAny<string>(), It.IsAny<List<string>>()))
-                .ThrowsAsync(new DomainDetectionTimeoutException(TimeSpan.Zero));
+                .ThrowsAsync(new TimeoutException());
 
             var controller = new Tilde.MT.TranslationAPIService.Controllers.TextController(
                 Mock.Of<ILogger<Tilde.MT.TranslationAPIService.Controllers.TextController>>(),
